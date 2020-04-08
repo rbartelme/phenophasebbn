@@ -3,6 +3,10 @@ set.seed(1234)
 
 # load libraries
 library(bnlearn)
+library(caret)
+
+
+
 
 # load curated season 4 dataset as dataframe
 season4 <- read.table("some_file.csv", header = TRUE, sep = ",")
