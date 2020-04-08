@@ -7,6 +7,10 @@ library(bnlearn)
 # load curated season 4 dataset as dataframe
 season4 <- read.table("some_file.csv", header = TRUE, sep = ",")
 
+# widen traits, keep dates/cultivars as a specific column
+
+# one hot encode cultivar data dummyVars from caret package
+
 # run hybrid hpc/hill climbing algorithm on the data
 season4_h2pc <- h2pc(season4, whitelist = NULL, blacklist = NULL, restrict.args = list(), maximize.args = list(), debug = FALSE)
 
