@@ -15,6 +15,7 @@ This project uses:
   * suggests starting with a non-temporal network analysis of dataset
   * BayesServer itself is closed source
 
-## To-do for *Sorghum bicolor* data
+## Necessities for *Sorghum bicolor* data
 
-- [ ] Encode datetime as simple series of T = [t<sub>0</sub>, t<sub>1</sub>, ..., t<sub>n</sub>]
+- Encode datetime as simple series of T = [t<sub>0</sub>, t<sub>1</sub>, ..., t<sub>n</sub>]
+- Encode cultivars with simple integers in network code
