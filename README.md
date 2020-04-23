@@ -11,3 +11,5 @@ This project uses:
 ## Dynamic Bayesian Belief Network Examples
 
 - [Using bnlearn](https://www.github.com/rbartelme/phenophasebbn)
+- [Introduction to Dynamic Bayesian Networks](https://www.bayesserver.com/docs/introduction/dynamic-bayesian-networks)
+  * suggests starting with a non-temporal network analysis of traits
