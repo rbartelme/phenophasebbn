@@ -13,3 +13,8 @@ This project uses:
 - [Using bnlearn](https://www.github.com/rbartelme/phenophasebbn)
 - [Introduction to Dynamic Bayesian Networks](https://www.bayesserver.com/docs/introduction/dynamic-bayesian-networks)
   * suggests starting with a non-temporal network analysis of dataset
+  * BayesServer itself is closed source
+
+## To-do for *Sorghum bicolor* data
+
+- [ ] Encode datetime as simple series of T = [t<sub>0</sub>, t<sub>1</sub>, ..., t<sub>n</sub>]
