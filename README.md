@@ -15,7 +15,11 @@ This project uses:
   * suggests starting with a non-temporal network analysis of dataset
   * BayesServer itself is closed source
 
-## Necessities for *Sorghum bicolor* data
+### Necessities for *Sorghum bicolor* data
 
 - Encode datetime as simple series of T = [t<sub>0</sub>, t<sub>1</sub>, ..., t<sub>n</sub>]
 - Encode cultivars with simple integers in network code
+
+### Considerations for generalization of network
+
+- [Elmendorf *et al.*, 2019: Time to branch out? Application of hierarchical survival models in plant phenology](https://www.sciencedirect.com/science/article/pii/S0168192319303107?via%3Dihub)
