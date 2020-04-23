@@ -22,4 +22,4 @@ This project uses:
 
 ### Considerations for generalization of network
 
-- [Elmendorf *et al.*, 2019: Time to branch out? Application of hierarchical survival models in plant phenology](https://www.sciencedirect.com/science/article/pii/S0168192319303107?via%3Dihub)
+- Elmendorf *et al.*, 2019: [Time to branch out? Application of hierarchical survival models in plant phenology](https://www.sciencedirect.com/science/article/pii/S0168192319303107?via%3Dihub)
