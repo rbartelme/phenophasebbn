@@ -22,9 +22,9 @@ s4test<-read.table(file= "~/s4combined.txt", header = TRUE, sep = "\t", fill = T
 #check rownames
 colnames(s4test)
 
-#make a vector of colnames to remove
+#make a vector of colnames to remove; lodging_present has no values, drop it
 data2cut<-c("sitename", "date", "treatment", "trait_description", "method_name", "units",
-  "year", "station_number", "surface_temperature")
+  "year", "station_number", "surface_temperature", "lodging_present")
 
 #subset data with columns removed
 s4clean<-as.data.frame(s4test[, !(colnames(s4test) %in% data2cut)])
@@ -42,16 +42,22 @@ names(cultivar_numeric)<-c("cultivar", "num_cultivar")
 cultivar_numeric<-as_tibble(cultivar_numeric)
 s4clean<-as_tibble(s4clean)
 
+#join/drop columns for cultivar names
 s4_bnready<-left_join(s4clean, cultivar_numeric, by = 'cultivar') %>% select(-cultivar)
-names(s4_bnready)
+#sanity check
+# names(s4_bnready)
 
+#convert to dataframe
 s4_bnIN <- as.data.frame(s4_bnready)
+#convert everything to a factor for bnlearn interoperability
+s4_bnIN[] <- lapply(s4_bnIN, as.factor)
 #================================================================
-# 2.) Parallel Structure Learning (DAG building)
+# 2.) Structure Learning (DAG building)
 #================================================================
 
-#min-max hill climbing for structure learning
-mmhc(x = s4_bnIN, cluster = cl)
+#impute values for missing data in network with min-max hill-climbing, and impute
+net_sem = structural.em(s4_bnIN, maximize = "mmhc")
+
 #================================================================
 # 3.) Parallel parameter learning (fitting data to DAG)
 #================================================================
