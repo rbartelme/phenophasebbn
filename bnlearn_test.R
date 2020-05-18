@@ -5,7 +5,7 @@ library(tidyverse)
 #================================================================
 # 1.) Setup parallel and dataset importation
 #================================================================
-# setup parallel cluster config 
+# setup parallel cluster config
 # (from bnlearn example: https://www.bnlearn.com/examples/pkg-parallel/)
 # number of cores = 2, but 48 available, up this
 cl = makeCluster(48)
@@ -52,13 +52,14 @@ s4_bnready<-left_join(s4clean, cultivar_numeric, by = 'cultivar') %>% select(-cu
 s4_bnIN <- as.data.frame(s4_bnready)
 #convert everything to a factor for bnlearn interoperability
 s4_bnIN[] <- lapply(s4_bnIN, as.factor)
+
 #================================================================
 # 2.) Structure Learning (DAG building)
 #================================================================
 
 #impute values for missing data in network with min-max hill-climbing, and impute
-# add a list of parameters for 
-net_sem = structural.em(s4_bnIN, maximize = "hc", maximize.args = list(), fit = "mle", fit.args = list(), impute = , 
+# add a list of parameters for
+net_sem = structural.em(s4_bnIN, maximize = "hc", maximize.args = list(), fit = "mle", fit.args = list(), impute = ,
                         impute.args = list())
 
 #================================================================
@@ -70,5 +71,3 @@ net_sem = structural.em(s4_bnIN, maximize = "hc", maximize.args = list(), fit = 
 #================================================================
 # 4.) Parallel cross-validation (validating fit of data to model)
 #================================================================
-
-
