@@ -7,7 +7,8 @@ library(tidyverse)
 #================================================================
 # setup parallel cluster config 
 # (from bnlearn example: https://www.bnlearn.com/examples/pkg-parallel/)
-cl = makeCluster(2)
+# number of cores = 2, but 48 available, up this
+cl = makeCluster(48)
 
 #test cluster config
 #rand = clusterEvalQ(cl, runif(10))
@@ -19,8 +20,8 @@ clusterSetRNGStream(cl, 42)
 #read in season 4 data
 s4test<-read.table(file= "~/s4combined.txt", header = TRUE, sep = "\t", fill = TRUE)
 
-#check rownames
-colnames(s4test)
+#check colnames
+#colnames(s4test)
 
 #make a vector of colnames to remove; lodging_present has no values, drop it
 data2cut<-c("sitename", "date", "treatment", "trait_description", "method_name", "units",
@@ -30,7 +31,7 @@ data2cut<-c("sitename", "date", "treatment", "trait_description", "method_name",
 s4clean<-as.data.frame(s4test[, !(colnames(s4test) %in% data2cut)])
 
 #list colnames from s4 cleaned data
-colnames(s4clean)
+#colnames(s4clean)
 
 #make dummy vars for cultivar, with a data frame of character/numeric values
 cultivar_numeric<-as.data.frame(cbind(as.character(unique(s4clean$cultivar)),as.numeric(unique(s4clean$cultivar))))
@@ -56,7 +57,7 @@ s4_bnIN[] <- lapply(s4_bnIN, as.factor)
 #================================================================
 
 #impute values for missing data in network with min-max hill-climbing, and impute
-net_sem = structural.em(s4_bnIN, maximize = "mmhc")
+net_sem = structural.em(s4_bnIN, maximize = "hc")
 
 #================================================================
 # 3.) Parallel parameter learning (fitting data to DAG)

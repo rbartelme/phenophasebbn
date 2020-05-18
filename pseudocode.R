@@ -31,6 +31,8 @@ plot(season4_h2pc)
 # fit bbn model to the results of the learning algorithm
   # * parallelize task
 
+    # number of cores on DE = 48
+
 fittedbbn <- bn.fit(season4_h2pc, data = season4)
 
 # Write out UTF encoded text version of fitted network
