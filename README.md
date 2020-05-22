@@ -19,6 +19,7 @@ This project uses:
 
 - Encode datetime as simple series of T = [t<sub>0</sub>, t<sub>1</sub>, ..., t<sub>n</sub>]
 - Encode cultivars with simple integers in network code
+- Winnow data to match MSU neural network team's input variables
 
 ### Considerations for generalization of network
 
