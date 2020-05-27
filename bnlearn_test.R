@@ -11,17 +11,31 @@ cl = makeCluster(48)
 #set seed for the whole cluster
 clusterSetRNGStream(cl, 42)
 
-#read in season 4 data
+# read in season 4 data
 s4test<-read.table(file= "~/phenophasebbn/s4combined.txt", header = TRUE, sep = "\t", fill = TRUE)
+
+# read in csv of cultivars across all studies
+ #NOTE: had to write in "cultivar" manually in first columnm, throws error with column names
+all_cult <- read_csv(file = "~/phenophasebbn/cultivar_look_up_2020-05-22.csv")
+
+# convert to dataframe
+cult_df <- as.data.frame(all_cult)
+
+# character vector of all cultivars present across all seasons 
+  # (0 = not in season, 1 = in season; therefore rowsum = 4 is in all)
+cultivars4net <- cult_df[rowSums(cult_df[,2:5])==4,1]
 
 #make a vector of colnames to remove; lodging_present has no values, drop it
 data2cut<-c("sitename", "date", "treatment", "trait_description", "method_name", "units",
   "year", "station_number", "surface_temperature", "lodging_present")
   
-  #Note: future network versions should include time in a dynamic BBN
+#Improvement: future network versions should include time in a dynamic BBN
+  
+#Note: alternatively could filter by data that are being used.
 
-#subset data with columns removed
-s4clean<-as.data.frame(s4test[, !(colnames(s4test) %in% data2cut)])
+#subset data with columns removed and by cultivars present in all datasets (UNTESTED)
+s4clean<-as.data.frame(s4test[s4test$cultivar %in% cultivars4net, !(colnames(s4test) %in% data2cut)])
+
 
 
 #make dummy vars for cultivar, with a data frame of character/numeric values

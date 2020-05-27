@@ -14,6 +14,32 @@ season4tall <- as_tibble(season4tall)
 s4wide<- season4tall %>% mutate(row = row_number()) %>% pivot_wider(id_cols = c(row,lat,lon,date,range,column,cultivar), names_from = trait, values_from = value) %>%
   select(-row)
 
+# ================================================================
+# Further data Cleaning Starts Here
+# ================================================================
+
+
+# ================================================================
+# 1) cut traits and environmental variables 
+# ================================================================
+
+#make a vector of colnames to remove; lodging_present has no values, drop it
+data2cut<-c("sitename", "date", "treatment", "trait_description", "method_name", "units",
+            "year", "station_number", "surface_temperature", "lodging_present")
+
+#Note: future network versions should include time in a dynamic BBN
+
+#subset data with columns removed
+s4clean<-as.data.frame(s4test[, !(colnames(s4test) %in% data2cut)])
+
+# ================================================================
+# 2) filter by cultivars in all data sets (including genomic)
+# ================================================================
+
+
+# ================================================================
+# 3) Join with weather data
+# ================================================================
 
 #read in weather data
 season4weather<-read.csv("~/season_4_weather_gdd2020-05-08T203153.csv")
