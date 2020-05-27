@@ -17,15 +17,20 @@ This project uses:
 #### iRODS setup in Rstudio
 
   1. Open `RStudio` `Terminal` tab
+  
   2. Execute `iinit` to begin iRODS setup for the [CyVerse Data Store](https://data.cyverse.org/)
+  
   3. You will be prompted to enter the following:
-    * Enter the host name (DNS) of the server to connect to: data.cyverse.org
-    * Enter the port number: 1247
-    * Enter your irods user name: (your CyVerse.org login)
-    * Enter your irods zone: iplant
-    * Enter your current iRODS password: (your CyVerse password)
+  - Enter the host name (DNS) of the server to connect to: `data.cyverse.org`
+  - Enter the port number: `1247`
+  - Enter your irods user name: `(your CyVerse.org login)`
+  - Enter your irods zone: `iplant`
+  - Enter your current iRODS password: `(your CyVerse password)`
+  
   4. Input files may now be moved into the container environment with `iget`
+  
   5. Files may be exported with `iput`
+  
   6. This directory can be cloned in the `RStudio` environment by navigating through the GUI menu:
     * File => New R Project => git
 
