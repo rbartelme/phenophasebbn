@@ -26,15 +26,18 @@ cult_df <- as.data.frame(all_cult)
 cultivars4net <- cult_df[rowSums(cult_df[,2:5])==4,1]
 
 #make a vector of colnames to remove; lodging_present has no values, drop it
-data2cut<-c("sitename", "date", "treatment", "trait_description", "method_name", "units",
-  "year", "station_number", "surface_temperature", "lodging_present")
-  
+#data2cut<-c("sitename", "date", "treatment", "trait_description", "method_name", "units",
+ # "year", "station_number", "surface_temperature", "lodging_present")
+#data to include
+data2include<-c("range", "column", "cultivar", "canopy_height", "flag_leaf_emergence_time", "vpd_mean", "daily_gdd","wind_speed_mean", "wind_vector_magnitude",
+                "wind_vector_direction", "wind_direction_std", "max_wind_speed", "air_temp_max", "air_temp_min", "air_temp_mean", "rh_max", "rh_min", "rh_mean",
+                "precip_total")
+# ==========================================================================================
 #Improvement: future network versions should include time in a dynamic BBN
-  
-#Note: alternatively could filter by data that are being used.
+# ==========================================================================================
 
 #subset data with columns removed and by cultivars present in all datasets (UNTESTED)
-s4clean<-as.data.frame(s4test[s4test$cultivar %in% cultivars4net, !(colnames(s4test) %in% data2cut)])
+s4clean<-as.data.frame(s4test[s4test$cultivar %in% cultivars4net, colnames(s4test) %in% data2include])
 
 
 
