@@ -66,7 +66,7 @@ s4_bnIN[] <- lapply(s4_bnIN, as.factor)
 
 #impute values for missing data in network with min-max hill-climbing, and impute
 # add a list of parameters for
-net_sem = structural.em(s4_bnIN, maximize = "hc", maximize.args = list("cluster" = cl), fit = "mle", fit.args = list("cluster" = cl))
+net_sem = structural.em(s4_bnIN, maximize = "hc", maximize.args = list("cluster" = cl), fit = "mle", debug = TRUE)
 
 #================================================================
 # 3.) Parallel parameter learning (fitting data to DAG)
