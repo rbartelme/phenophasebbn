@@ -62,7 +62,23 @@ This project uses:
 
   3. Repeat step 2 for the `/season4/weather/data/dir` and `/cultivar/experiment/list`
 
-  4. Run cleanup script `season4_bnprocess.R` in Rstudio environment 
+  4. Run cleanup script `season4_bnprocess.R` in Rstudio environment
+
+  - Note: Each step should be documented with comments in the script
+
+  5. Export combined season 4 dataset
+
+---
+
+#### Running Bayesian Network Analysis
+
+  1. Load `bnlearn_test.R`
+
+  2. Follow instructions in script to run network (this may take a few hours)
+
+  3. Feel free to close the CyVerse Discovery Environment window until the network analysis finishes
+
+  4. Export `.pdf` file of graph structure from Script 
 
 ---
 
