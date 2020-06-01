@@ -3,8 +3,9 @@ Phenophase Bayesian Belief Network in R
 
 This project uses:
 
+  - [Rocker Group](https://github.com/rocker-org)'s Tidyverse Docker Container Version 3.6.2 as the base image
   - the [bnlearn](https://www.bnlearn.com/) R library
-  - data from the TERRA-REF project
+  - data from the [TERRA-REF project](https://www.terraref.org/)
 
  To develop a probabilistic network predicting phenotype transitions in *Sorghum bicolor*
 
@@ -12,29 +13,39 @@ This project uses:
 
 ### Container Setup
 
-- Binder Button for CyVerse App will go here
+---
+
+#### Log on to CyVerse Discovery environment
+
+[Click here for details on the CyVerse Discovery Environment](https://learning.cyverse.org/projects/container_camp_workshop_2019/en/latest/cyverse/de_docker.html)
+
+  1. Load application `Bnlearn_Rstudio_CPU`
+  2. When prompted that the analysis is running log in to the Rstudio container
+  3.
+
+---
 
 #### iRODS setup in Rstudio
 
   1. Open `RStudio` `Terminal` tab
-  
+
   2. Execute `iinit` to begin iRODS setup for the [CyVerse Data Store](https://data.cyverse.org/)
-  
+
   3. You will be prompted to enter the following:
   - Enter the host name (DNS) of the server to connect to: `data.cyverse.org`
   - Enter the port number: `1247`
   - Enter your irods user name: `(your CyVerse.org login)`
   - Enter your irods zone: `iplant`
   - Enter your current iRODS password: `(your CyVerse password)`
-  
+
   4. Input files may now be moved into the container environment with `iget`
-  
+
   5. Files may be exported with `iput`
-  
+
   6. This directory can be cloned in the `RStudio` environment by navigating through the GUI menu:
     * File => New R Project => git
 
---- 
+---
 
 ## Project Notes
 
