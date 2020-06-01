@@ -7,16 +7,16 @@ library(tidyverse)
 #================================================================
 # setup parallel cluster config
 # 48 cores
-cl = makeCluster(48)
+cl = makeCluster(16)
 #set seed for the whole cluster
 clusterSetRNGStream(cl, 42)
 
 # read in season 4 data
-s4test<-read.table(file= "~/phenophasebbn/s4combined.txt", header = TRUE, sep = "\t", fill = TRUE)
+s4test<-read.table(file= "~/s4combined.txt", header = TRUE, sep = "\t", fill = TRUE)
 
 # read in csv of cultivars across all studies
  #NOTE: had to write in "cultivar" manually in first columnm, throws error with column names
-all_cult <- read_csv(file = "~/phenophasebbn/cultivar_look_up_2020-05-22.csv")
+all_cult <- read_csv(file = "~/cultivar_look_up_2020-05-22.csv")
 
 # convert to dataframe
 cult_df <- as.data.frame(all_cult)
@@ -67,7 +67,7 @@ s4_bnIN[] <- lapply(s4_bnIN, as.factor)
 #impute values for missing data in network with min-max hill-climbing, and impute
 # add a list of parameters for
 net_sem = structural.em(s4_bnIN, maximize = "hc", maximize.args = list("cluster" = cl), fit = "mle", debug = TRUE)
-
+plot(net_sem)
 #================================================================
 # 3.) Parallel parameter learning (fitting data to DAG)
 #================================================================
