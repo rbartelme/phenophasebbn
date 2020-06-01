@@ -20,8 +20,18 @@ This project uses:
 [Click here for details on the CyVerse Discovery Environment](https://learning.cyverse.org/projects/container_camp_workshop_2019/en/latest/cyverse/de_docker.html)
 
   1. Load application `Bnlearn_Rstudio_CPU`
+
   2. When prompted that the analysis is running log in to the Rstudio container
-  3.
+
+  - the `username` is `rstudio` and the `password` is `rstudio1`
+
+  3. This directory can be cloned in the `RStudio` environment by navigating through the GUI menu:
+
+  - `File` &#8594; `New R Project` &#8594; `git`
+
+  - You will then be prompted for this directory and able to clone it into the container environment
+
+  4. At this point you will need to setup the iRODS system to transfer files
 
 ---
 
@@ -42,8 +52,17 @@ This project uses:
 
   5. Files may be exported with `iput`
 
-  6. This directory can be cloned in the `RStudio` environment by navigating through the GUI menu:
-    * File => New R Project => git
+---
+
+#### Transferring Files and Using Clean Up Script
+
+  1. Use `icd` to navigate to the directory containing the season 4 data
+
+  2. Use `iget` to move the csv `FILENAME` from `/some/cyverse/datastore/dir/` into the directory `phenophasebbn/`
+
+  3. Repeat step 2 for the `/season4/weather/data/dir` and `/cultivar/experiment/list`
+
+  4. Run cleanup script `season4_bnprocess.R` in Rstudio environment 
 
 ---
 
