@@ -5,7 +5,7 @@ library(tidyr)
 #Ran on the Rockerverse Container on CyVerse VICE 05-08-2020
 
 #read in season4 trait data tall format
-season4tall<-read.csv(file="~/season_4_tall_2020-05-08T203345.csv")
+season4tall<-read.csv(file="~/phenophasebbn/season_4_tall_2020-05-08T203345.csv")
 
 #convert to tibble
 season4tall <- as_tibble(season4tall)
@@ -24,7 +24,7 @@ s4wide<- season4tall %>% mutate(row = row_number()) %>% pivot_wider(id_cols = c(
 # ================================================================
 
 #make a vector of colnames to remove; lodging_present has no values, drop it
-data2cut<-c("sitename", "date", "treatment", "trait_description", "method_name", "units",
+data2cut<-c("sitename", "treatment", "trait_description", "method_name", "units",
             "year", "station_number", "surface_temperature", "lodging_present")
 
 #Note: future network versions should include time in a dynamic BBN
@@ -35,17 +35,33 @@ s4clean<-as.data.frame(s4test[, !(colnames(s4test) %in% data2cut)])
 # ================================================================
 # 2) filter by cultivars in all data sets (including genomic)
 # ================================================================
+all_cult <- read_csv(file = "~/cultivar_look_up_2020-05-22.csv")
 
+# convert to dataframe
+cult_df <- as.data.frame(all_cult)
+
+# first column is a character vector of all cultivars present across all seasons 
+# (0 = not in season, 1 = in season; therefore rowsum = 4 is in all)
+cultivars4net <- cult_df[rowSums(cult_df[,2:5])==4,1]
+
+#filter season4 dataset by cultivars in all datasets
+s4filtered<-as.data.frame(s4clean[s4clean$cultivar %in% cultivars4net,])
+
+#remove all na canopy heights
+s4_Df<-s4filtered[!is.na(s4filtered$canopy_height),]
+
+#convert season 4 dataframe to tibble
+s4_tib<-as_tibble(s4_Df)
 
 # ================================================================
 # 3) Join with weather data
 # ================================================================
 
 #read in weather data
-season4weather<-read.csv("~/season_4_weather_gdd2020-05-08T203153.csv")
+season4weather<-read.csv("~/phenophasebbn/season_4_weather_gdd2020-05-08T203153.csv")
 
 #left join weather and 
-s4combined<-as.data.frame(left_join(s4wide, season4weather, by="date"))
+s4combined<-as.data.frame(left_join(s4_tib, season4weather, by="date"))
 
 
 #write out tsv file
