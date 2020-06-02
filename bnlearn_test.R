@@ -20,8 +20,8 @@ s4test<-read.table(file= "~/phenophasebbn/s4combined.txt", header = TRUE, sep = 
 colnames(s4test)<-gsub(".x$","",colnames(s4test))
 colnames(s4test)<-gsub(".y$","",colnames(s4test))
 
-#data to include
-data2include<-c("range", "column", "cultivar", "canopy_height", "flag_leaf_emergence_time", "vpd_mean", "daily_gdd","wind_speed_mean", "wind_vector_magnitude",
+#data to include; excluding "flag_leaf_emergence_time", for this since NA's are appearing
+data2include<-c("range", "column", "cultivar", "canopy_height",  "vpd_mean", "daily_gdd","wind_speed_mean", "wind_vector_magnitude",
                 "wind_vector_direction", "wind_direction_std", "max_wind_speed", "air_temp_max", "air_temp_min", "air_temp_mean", "rh_max", "rh_min", "rh_mean",
                 "precip_total")
 
@@ -31,7 +31,6 @@ data2include<-c("range", "column", "cultivar", "canopy_height", "flag_leaf_emerg
 
 #subset data by variables to include
 s4clean<-as.data.frame(s4test[, colnames(s4test) %in% data2include])
-
 #make dummy vars for cultivar, with a data frame of character/numeric values
 cultivar_numeric<-as.data.frame(cbind(as.character(unique(s4clean$cultivar)),as.numeric(unique(s4clean$cultivar))))
 
@@ -50,15 +49,13 @@ s4_bnIN <- as.data.frame(s4_bnready)
 
 #convert everything in data frame to a factor for bnlearn interoperability
 s4_bnIN[] <- lapply(s4_bnIN, as.factor)
-summary(s4_bnIN$flag_leaf_emergence_time)
+
 #================================================================
 # 2.) Structure Learning (DAG building)
 #================================================================
 
-#impute values for missing data in network with min-max hill-climbing, and impute
-# add a list of parameters for
-net_sem = structural.em(s4_bnIN, maximize = "hc", maximize.args = list("cluster" = cl), fit = "mle", debug = TRUE)
-plot(net_sem)
+
+
 #================================================================
 # 3.) Parallel parameter learning (fitting data to DAG)
 #================================================================

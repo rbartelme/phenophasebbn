@@ -30,7 +30,7 @@ data2cut<-c("sitename", "treatment", "trait_description", "method_name", "units"
 #Note: future network versions should include time in a dynamic BBN
 
 #subset data with columns removed
-s4clean<-as.data.frame(s4test[, !(colnames(s4test) %in% data2cut)])
+s4_df<-as.data.frame(s4wide[, !(colnames(s4wide) %in% data2cut)])
 
 # ================================================================
 # 2) filter by cultivars in all data sets (including genomic)
@@ -45,13 +45,13 @@ cult_df <- as.data.frame(all_cult)
 cultivars4net <- cult_df[rowSums(cult_df[,2:5])==4,1]
 
 #filter season4 dataset by cultivars in all datasets
-s4filtered<-as.data.frame(s4clean[s4clean$cultivar %in% cultivars4net,])
+s4filtered<-as.data.frame(s4_df[s4_df$cultivar %in% cultivars4net,])
 
 #remove all na canopy heights
-s4_Df<-s4filtered[!is.na(s4filtered$canopy_height),]
+s4_Df2<-s4filtered[!is.na(s4filtered$canopy_height),]
 
 #convert season 4 dataframe to tibble
-s4_tib<-as_tibble(s4_Df)
+s4_tib<-as_tibble(s4_Df2)
 
 # ================================================================
 # 3) Join with weather data
@@ -65,7 +65,8 @@ s4combined<-as.data.frame(left_join(s4_tib, season4weather, by="date"))
 
 
 #write out tsv file
-write.table(s4combined, file="~/s4combined.txt", quote = FALSE, sep = "\t")
+write.table(s4combined, file="~/phenophasebbn/s4combined.txt", quote = FALSE, sep = "\t")
 
-#used iRODS iput to move this script, and its output to ../season4_bninput
+#DEPRECATED: used iRODS iput to move this script, and its output to ../season4_bninput
+#Input now resides in the github repo
 
