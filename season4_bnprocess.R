@@ -35,7 +35,7 @@ s4clean<-as.data.frame(s4test[, !(colnames(s4test) %in% data2cut)])
 # ================================================================
 # 2) filter by cultivars in all data sets (including genomic)
 # ================================================================
-all_cult <- read_csv(file = "~/cultivar_look_up_2020-05-22.csv")
+all_cult <- read_csv(file = "~/phenophasebbn/cultivar_look_up_2020-05-22.csv")
 
 # convert to dataframe
 cult_df <- as.data.frame(all_cult)
