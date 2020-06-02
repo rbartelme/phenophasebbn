@@ -67,6 +67,21 @@ bl <- rbind(wind_mat, hum_mat, air_mat)
 #add colnames recognized by bnlearn
 colnames(bl) <- c("from", "to")
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Hybrid Structure Learning Algorithms
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#rs2max
+s4_rsmax2 <- rsmax2(s4_bnIN, blacklist = bl, restrict = "si.hiton.pc", maximize = "hc",  debug = TRUE)
+
+#mmhc
+s4_mmhc <- mmhc(s4_bnIN, blacklist = bl, debug = TRUE)
+
+#h2pc
+s4_h2pc <- h2pc(s4_bnIN, blacklist = bl, debug = TRUE)
+
+
+
 #================================================================
 # 3.) Parallel parameter learning (fitting data to DAG)
 #================================================================
