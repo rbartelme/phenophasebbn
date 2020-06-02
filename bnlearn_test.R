@@ -63,7 +63,7 @@ hum_mat <- t(combn(grep("rh_*", colnames(s4_bnIN), value = TRUE), m = 2))
 air_mat <- t(combn(grep("*air_*", colnames(s4_bnIN), value = TRUE), m = 2))
 
 #blacklist derived data in matrix
-bl <- rbind(wind_mat, hum_mat, air_mat)
+bl <- rbind(wind_mat, hum_mat, air_mat) 
 #add colnames recognized by bnlearn
 colnames(bl) <- c("from", "to")
 
