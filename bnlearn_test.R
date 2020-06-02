@@ -12,13 +12,8 @@ cl = makeCluster(16)
 clusterSetRNGStream(cl, 42)
 
 # read in season 4 data
-#cultivar filtering moved to season4_bnprocess.R
-# new output from bnprocess adds .x and .y to colnames?
-
 s4test<-read.table(file= "~/phenophasebbn/s4combined.txt", header = TRUE, sep = "\t", fill = TRUE)
-#clean up column names
-colnames(s4test)<-gsub(".x$","",colnames(s4test))
-colnames(s4test)<-gsub(".y$","",colnames(s4test))
+
 
 #data to include; excluding "flag_leaf_emergence_time", for this since NA's are appearing
 data2include<-c("range", "column", "cultivar", "canopy_height",  "vpd_mean", "daily_gdd","wind_speed_mean", "wind_vector_magnitude",
@@ -54,7 +49,23 @@ s4_bnIN[] <- lapply(s4_bnIN, as.factor)
 # 2.) Structure Learning (DAG building)
 #================================================================
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Start building blacklist matrix for derived data
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+# wind weather data
+wind_mat<-t(combn(grep("*wind_*", colnames(s4_bnIN), value = TRUE), m = 2))
+
+# relative humidity
+hum_mat <- t(combn(grep("rh_*", colnames(s4_bnIN), value = TRUE), m = 2))
+
+# air temperature
+air_mat <- t(combn(grep("*air_*", colnames(s4_bnIN), value = TRUE), m = 2))
+
+#blacklist derived data in matrix
+bl <- rbind(wind_mat, hum_mat, air_mat)
+#add colnames recognized by bnlearn
+colnames(bl) <- c("from", "to")
 
 #================================================================
 # 3.) Parallel parameter learning (fitting data to DAG)
