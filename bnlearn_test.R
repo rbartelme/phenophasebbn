@@ -63,23 +63,34 @@ hum_mat <- t(combn(grep("rh_*", colnames(s4_bnIN), value = TRUE), m = 2))
 air_mat <- t(combn(grep("*air_*", colnames(s4_bnIN), value = TRUE), m = 2))
 
 #blacklist derived data in matrix
-bl <- rbind(wind_mat, hum_mat, air_mat) 
+bl <- rbind(wind_mat, hum_mat, air_mat)
 #add colnames recognized by bnlearn
 colnames(bl) <- c("from", "to")
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Hybrid Structure Learning Algorithms
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#whitelist a priori links
+wl <- as.matrix(c("daily_gdd", "canopy_height"), nrow = 1, ncol = 2)
+#add colnames to wl
+colnames(wl) <- c("from", "to")
 
-#rs2max
-s4_rsmax2 <- rsmax2(s4_bnIN, blacklist = bl, restrict = "si.hiton.pc", maximize = "hc",  debug = TRUE)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Hybrid Structure Learning Algorithms #
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# structure learning was running so rapidly because all commands lack restrict and maximize args
+
+
+#rsmax2
+# a general implementation of the sparse candidate algorithm
+s4_rsmax2 <- rsmax2(s4_bnIN, blacklist = bl, restrict = "si.hiton.pc", restrict.args = list(cluster = cl, B = 10000, blacklist = bl, whitelist = wl, undirected = TRUE),
+  maximize = "hc", maximize.args = list(whitelist = wl, blacklist = bl, perturb = 20), debug = TRUE)
 
 #mmhc
+# a general implementation of min-max hill climbing
+
 s4_mmhc <- mmhc(s4_bnIN, blacklist = bl, debug = TRUE)
 
 #h2pc
+#
 s4_h2pc <- h2pc(s4_bnIN, blacklist = bl, debug = TRUE)
-
 
 
 #================================================================
