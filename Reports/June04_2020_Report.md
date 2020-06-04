@@ -1,4 +1,5 @@
 ## First Static Network Attempt Report:
+*by Ryan Bartelme, PhD - June 4th, 2020*
 
 ---
 
@@ -14,9 +15,9 @@
 
 * It may be best to actually link derived data
 
-* Important to link static properties of the system 
+* Important to link static properties of the system
 
-#### Examples: 
+#### Examples:
 
 * Cultivars are not moving, they are statically linked to their location
 
