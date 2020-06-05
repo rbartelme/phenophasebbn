@@ -1,4 +1,7 @@
 library(shiny)
+library(tidyverse)
+#library(bnlearn)
+#library(graphviz)
 
 # ===========================================================
 # place holder HelloShiny example from
@@ -17,6 +20,9 @@ ui <- fluidPage(
     # Sidebar panel for inputs ----
     sidebarPanel(
 
+      # Need to change this to select graph
+        #options are A_manual or B_learned
+
       # Input: Slider for the number of bins ----
       sliderInput(inputId = "bins",
                   label = "Number of bins:",
@@ -28,7 +34,16 @@ ui <- fluidPage(
 
     # Main panel for displaying outputs ----
     mainPanel(
-
+      #Main panel should display 2 plot outputs
+      # 1) DAG's
+      # 2) diagnostic plots by node
+        # this is done using score(..., by.node = TRUE, ...)
+        # And plotting the results
+      # 3) subheading similarity of graphs from bnlearn function
+        # This can be summarized with:
+        # all.equal(A,B) - all nodes compared, returns boolean
+        # hamming() - will calculate the hamming distance between graph structures
+        # graphviz.compare()
       # Output: Histogram ----
       plotOutput(outputId = "distPlot")
 
@@ -49,6 +64,10 @@ server <- function(input, output) {
   # 1. It is "reactive" and therefore should be automatically
   #    re-executed when inputs (input$bins) change
   # 2. Its output type is a plot
+
+  # The server function will be redefined by if elseif else statements
+  # Similar to what was implemented in the AZCOVID text project
+
   output$distPlot <- renderPlot({
 
     x    <- faithful$waiting
@@ -61,3 +80,8 @@ server <- function(input, output) {
     })
 
 }
+
+#======================================
+# App Declaration
+#======================================
+shinyApp(ui = ui, server = server)
