@@ -25,8 +25,13 @@ dedup(data, threshold, debug = FALSE)
 * `method = ` options are:
   * `"interval"` for interval discretization
   * `"quantile"` *default*, for quantile discretization
-  * `"hartemink"` for hartemink's pairwaise mutual information discretization
+  * `"hartemink"` for Hartemink's pairwaise mutual information discretization
 
+Note from `bnlearn` manual on Hartemink's methods:
+
+```
+Hartemink's algorithm has been designed to deal with sets of homogeneous, continuous variables; this is the reason why they are initially transformed into discrete variables, all with the same number of levels (given by the ibreaks argument). Which of the other algorithms is used is specified by the idisc argument (quantile is the default). The implementation in bnlearn also handles sets of discrete variables with the same number of levels, which are treated as adjacent interval identifiers. This allows the user to perform the initial discretization with the algorithm of their choice, as long as all variables have the same number of levels in the end.
+```
 ---
 
 ### Conditional Independence testing
