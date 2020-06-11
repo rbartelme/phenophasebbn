@@ -26,7 +26,9 @@ RUN chmod -R 777 /usr/local/lib/R/site-library
 
 # install additonal R libraries
 
-RUN R -e 'install.packages(c("bnlearn","markovchain"), dependencies = TRUE)'
+RUN R -e 'install.packages(c("bnlearn","markovchain","deal"), dependencies = TRUE)'
+
+RUN R -e 'BiocManager::install("Rgraphviz")'
 
 ENV PASSWORD "rstudio1"
 RUN bash /etc/cont-init.d/userconf
