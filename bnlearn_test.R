@@ -16,8 +16,8 @@ s4test<-read.table(file= "~/phenophasebbn/s4combined.txt", header = TRUE, sep = 
 
 
 #data to include; excluding "flag_leaf_emergence_time", for this since NA's are appearing
-data2include<-c("range", "column", "cultivar", "canopy_height",  "vpd_mean", "daily_gdd","wind_speed_mean", "wind_vector_magnitude",
-                "wind_vector_direction", "wind_direction_std", "max_wind_speed", "air_temp_max", "air_temp_min", "air_temp_mean", "rh_max", "rh_min", "rh_mean",
+data2include<-c("cultivar", "canopy_height",  "vpd_mean", "daily_gdd","wind_speed_mean", "wind_vector_magnitude",
+                "wind_vector_direction", "wind_direction_std", "max_wind_speed", "air_temp_mean", "rh_mean",
                 "precip_total")
 
 # ==========================================================================================
@@ -54,6 +54,12 @@ s4clean[] <- lapply(s4clean, as.factor)
 s4manDAG <- empty.graph(data2include)
 
 #begin to encode edges and directions
+edges = matrix(c("cultivar", "range", "range", "column", "C", "D"),
+               +           ncol = 2, byrow = TRUE,
+               +           dimnames = list(NULL, c("from", "to")))
+
+#manually assign edges to empty graph
+arcs(s4manDAG) = edges
 
 #================================================================
 # 2b.) Structure Learning (algorithmically build DAG)
