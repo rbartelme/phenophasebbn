@@ -15,8 +15,7 @@ clusterSetRNGStream(cl, 42)
 s4test<-read.table(file= "~/phenophasebbn/s4combined.txt", header = TRUE, sep = "\t", fill = TRUE)
 
 # test data
-data2include<-c("cultivar", "canopy_height",  "vpd_mean", "daily_gdd","wind_speed_mean", "wind_vector_magnitude",
-                "wind_vector_direction", "wind_direction_std", "max_wind_speed", "air_temp_mean", "rh_mean",
+data2include<-c("cultivar", "canopy_height",  "vpd_mean", "daily_gdd", "air_temp_mean", "rh_mean",
                 "precip_total")
 
 # ==========================================================================================
@@ -36,68 +35,43 @@ s4clean[] <- lapply(s4clean, as.factor)
 s4manDAG <- empty.graph(data2include)
 
 #begin to encode edges and directions
-edges = matrix(c("cultivar", "canopy_height", "range", "column", "C", "D"),
-               +           ncol = 2, byrow = TRUE,
-               +           dimnames = list(NULL, c("from", "to")))
+edges = matrix(c("cultivar", "canopy_height", "daily_gdd", "canopy_height", "precip_total", "canopy_height","vpd_mean","canopy_height","rh_mean", "canopy_height", "air_temp_mean","canopy_height"),
+               ncol = 2, byrow = TRUE,
+               dimnames = list(NULL, c("from", "to")))
 
 #manually assign edges to empty graph
 arcs(s4manDAG) = edges
-
+plot(s4manDAG)
 #================================================================
 # 2b.) Structure Learning (algorithmically build DAG)
 #================================================================
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Start building blacklist matrix for derived data
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# exclude derived data through "black list"
+bl <- matrix(c("rh_mean", "vpd_mean", "air_temp_mean", "vpd_mean"),
+             ncol = 2, byrow = TRUE,
+             dimnames = list(NULL, c("from", "to")))
 
-# wind weather data
-wind_mat<-t(combn(grep("*wind_*", colnames(s4clean), value = TRUE), m = 2))
-
-# relative humidity
-hum_mat <- t(combn(grep("rh_*", colnames(s4clean), value = TRUE), m = 2))
-
-# air temperature
-air_mat <- t(combn(grep("*air_*", colnames(s4clean), value = TRUE), m = 2))
-
-#blacklist derived data in matrix
-bl <- rbind(wind_mat, hum_mat, air_mat)
-#add colnames recognized by bnlearn
-colnames(bl) <- c("from", "to")
-
-#whitelist a priori links
-wl <- t(as.matrix(combn(c("daily_gdd", "canopy_height", "cultivar", "column", "range"),  m= 2 )))
-#add colnames to wl
-colnames(wl) <- c("from", "to")
+ 
+# include a priori links through "white list"
+wl <- matrix(c("cultivar", "canopy_height", "daily_gdd", "canopy_height"),
+             ncol = 2, byrow = TRUE,
+             dimnames = list(NULL, c("from", "to")))
 
 #make an empty graph with wl & bl
 s4learnDAG <- empty.graph(data2include)
 
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  Structure Learning Algorithms       #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# structure learning was running so rapidly because all commands lack restrict and maximize args
+
+# hill climb search *needs improvement
+s4_hc <- hc(s4clean, whitelist = wl, blacklist = bl)
+
+# tabu greedy search
 s4_tabu <- tabu(s4clean, whitelist = wl, blacklist = bl, tabu = 15, max.iter = 1000)
 plot(s4_tabu)
-#rsmax2
-# a general implementation of the sparse candidate algorithm
-# s4_rsmax2 <- rsmax2(s4_bnIN, blacklist = bl, whitelist = wl, restrict = "si.hiton.pc",  maximize = "hc", debug = TRUE)
-s4_rsmax2 <- rsmax2(s4_bnIN, blacklist = bl, whitelist = wl, restrict = "si.hiton.pc", maximize = "tabu", test = "zf", alpha = 0.01, score = "bic-g", debug = TRUE)
-plot(s4_rsmax2)
- 
-#mmhc
-# a general implementation of min-max hill climbing
 
-s4_mmhc <- mmhc(s4_bnIN, blacklist = bl, whitelist = wl, debug = TRUE)
 
-plot(s4_mmhc)
-
-#h2pc
-#
-s4_h2pc <- h2pc(s4_bnIN, blacklist = bl, whitelist = wl, debug = TRUE)
-
-plot(s4_h2pc)
 
 #================================================================
 # 3.) Parallel parameter learning (fitting data to DAG)
