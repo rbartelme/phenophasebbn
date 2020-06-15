@@ -14,8 +14,7 @@ clusterSetRNGStream(cl, 42)
 # read in season 4 data
 s4test<-read.table(file= "~/phenophasebbn/s4combined.txt", header = TRUE, sep = "\t", fill = TRUE)
 
-
-#data to include; excluding "flag_leaf_emergence_time", for this since NA's are appearing
+# test data
 data2include<-c("cultivar", "canopy_height",  "vpd_mean", "daily_gdd","wind_speed_mean", "wind_vector_magnitude",
                 "wind_vector_direction", "wind_direction_std", "max_wind_speed", "air_temp_mean", "rh_mean",
                 "precip_total")
@@ -26,26 +25,9 @@ data2include<-c("cultivar", "canopy_height",  "vpd_mean", "daily_gdd","wind_spee
 
 #subset data by variables to include
 s4clean<-as.data.frame(s4test[, colnames(s4test) %in% data2include])
-#make dummy vars for cultivar, with a data frame of character/numeric values
-#cultivar_numeric<-as.data.frame(cbind(as.character(unique(s4clean$cultivar)),as.numeric(unique(s4clean$cultivar))))
-
-#make colnames match
-#names(cultivar_numeric)<-c("cultivar", "num_cultivar")
-
-#tibble conversion
-#cultivar_numeric<-as_tibble(cultivar_numeric)
-#s4clean<-as_tibble(s4clean)
-
-#join/drop columns for cultivar names
-#s4_bnready<-left_join(s4clean, cultivar_numeric, by = 'cultivar') %>% select(-cultivar)
-
-#convert to dataframe
-#s4_bnIN <- as.data.frame(s4_bnready)
 
 #convert everything in data frame to a factor for bnlearn interoperability
 s4clean[] <- lapply(s4clean, as.factor)
-
-#s4_bnIN[] <- lapply(s4_bnIN, as.factor)
 
 #================================================================
 # 2a.) Define Structure (Heuristical DAG building)
@@ -54,7 +36,7 @@ s4clean[] <- lapply(s4clean, as.factor)
 s4manDAG <- empty.graph(data2include)
 
 #begin to encode edges and directions
-edges = matrix(c("cultivar", "range", "range", "column", "C", "D"),
+edges = matrix(c("cultivar", "canopy_height", "range", "column", "C", "D"),
                +           ncol = 2, byrow = TRUE,
                +           dimnames = list(NULL, c("from", "to")))
 
