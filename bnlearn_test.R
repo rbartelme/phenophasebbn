@@ -48,7 +48,15 @@ s4clean[] <- lapply(s4clean, as.factor)
 #s4_bnIN[] <- lapply(s4_bnIN, as.factor)
 
 #================================================================
-# 2.) Structure Learning (DAG building)
+# 2a.) Define Structure (Heuristical DAG building)
+#================================================================
+#make an empty DAG
+s4manDAG <- empty.graph(data2include)
+
+#begin to encode edges and directions
+
+#================================================================
+# 2b.) Structure Learning (algorithmically build DAG)
 #================================================================
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -73,6 +81,10 @@ colnames(bl) <- c("from", "to")
 wl <- t(as.matrix(combn(c("daily_gdd", "canopy_height", "cultivar", "column", "range"),  m= 2 )))
 #add colnames to wl
 colnames(wl) <- c("from", "to")
+
+#make an empty graph with wl & bl
+s4learnDAG <- empty.graph(data2include)
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  Structure Learning Algorithms       #
