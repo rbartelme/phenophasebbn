@@ -10,6 +10,16 @@
 
 ---
 
+### Prior Implementation of Bayesian Networks with `bnlearn` in plant phenomics
+
+* [Scutari *et al.*, *Genetics* 2014](https://www.genetics.org/content/genetics/198/1/129.full.pdf): *Multiple Quantitative Trait Analysis Using Bayesian Networks*
+
+---
+
+## Other Notes
+
+---
+
 ### Data Discretization
 
 * `bnlearn` implements the following for discretization and deduplication of highly correlated variables
@@ -45,3 +55,5 @@ Hartemink's algorithm has been designed to deal with sets of homogeneous, contin
   * For *Mixed Discrete and Normal, or Hybrid Networks*
     * `test = "mi-cg"` is the asymptomatic chi-square test of mutual information (an information theoretical distance)
   * `B = n` where `n` is an integer corresponding to the number of permutations
+
+---
