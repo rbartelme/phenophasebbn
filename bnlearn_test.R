@@ -53,7 +53,7 @@ bl <- matrix(c("rh_mean", "vpd_mean", "air_temp_mean", "vpd_mean"),
 
  
 # include a priori links through "white list"
-wl <- matrix(c("cultivar", "canopy_height", "daily_gdd", "canopy_height"),
+wl <- matrix(c("cultivar", "canopy_height", "daily_gdd", "canopy_height", "precip_total","canopy_height"),
              ncol = 2, byrow = TRUE,
              dimnames = list(NULL, c("from", "to")))
 
@@ -66,9 +66,11 @@ s4learnDAG <- empty.graph(data2include)
 
 # hill climb search *needs improvement
 s4_hc <- hc(s4clean, whitelist = wl, blacklist = bl)
+plot(s4_hc)
+
 
 # tabu greedy search
-s4_tabu <- tabu(s4clean, whitelist = wl, blacklist = bl, tabu = 15, max.iter = 1000)
+s4_tabu <- tabu(s4clean, whitelist = wl, blacklist = bl, tabu = 10, max.tabu = 5)
 plot(s4_tabu)
 
 
