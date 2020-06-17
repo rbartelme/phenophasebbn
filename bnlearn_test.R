@@ -77,14 +77,13 @@ plot(s4_tabu)
 # 3.) Parallel parameter learning (fitting data to DAG)
 #================================================================
 
-#define a function to operate over the list of networks for season4 data
+#define a function to fit networks for season4 data with the same parameters
 fit_net<-function(bn){
   bn.fit(x=bn, data = s4clean, cluster = cl, method = "mle", keep.fitted = TRUE)
 }
 
 #fit data to manual graph
 s4_man_fit <- fit_net(s4manDAG)
-
 #Throws error:
 # Error in checkForRemoteErrors(val) : 
 # one node produced an error: attempting to create a table with more than INT_MAX cells. 
@@ -92,8 +91,13 @@ s4_man_fit <- fit_net(s4manDAG)
 #fit data to HC graph
 s4_hc_fit <- fit_net(s4_hc)
 
+#bayesian information criterion of the fit
+BIC(s4_hc_fit, s4clean)
+
 #fit data to tabu graph
 s4_tabu_fit<-fit_net(s4_tabu)
+
+BIC(s4_tabu_fit, s4clean)
 
 
 #======= Not Working ==========#
