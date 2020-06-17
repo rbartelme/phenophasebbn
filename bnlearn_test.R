@@ -77,17 +77,33 @@ plot(s4_tabu)
 # 3.) Parallel parameter learning (fitting data to DAG)
 #================================================================
 
-#make a list of DAG's
-s4_dag_list<-list(s4manDAG,s4_hc,s4_tabu)
-
 #define a function to operate over the list of networks for season4 data
 fit_net<-function(bn){
   bn.fit(x=bn, data = s4clean, cluster = cl, method = "mle", keep.fitted = TRUE)
 }
 
+#fit data to manual graph
+s4_man_fit <- fit_net(s4manDAG)
+
+#Throws error:
+# Error in checkForRemoteErrors(val) : 
+# one node produced an error: attempting to create a table with more than INT_MAX cells. 
+
+#fit data to HC graph
+s4_hc_fit <- fit_net(s4_hc)
+
+#fit data to tabu graph
+s4_tabu_fit<-fit_net(s4_tabu)
+
+
+#======= Not Working ==========#
+
+#make a list of DAG's
+s4_dag_list<-list(s4manDAG,s4_hc,s4_tabu)
+
 #use map from purrr to operate the bn.fit function over the list of DAG's
   # output: a list of fitted BN's
-s4_fitted_list<-map(s4_dag_list,fit_net)
+s4_fitted_list<-map(s4_dag_list, fit_net)
 #================================================================
 # 4.) Parallel cross-validation (validating fit of data to model)
 #================================================================
