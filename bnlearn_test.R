@@ -97,10 +97,11 @@ BIC(s4_hc_fit, s4clean)
 #fit data to tabu graph
 s4_tabu_fit<-fit_net(s4_tabu)
 
+#BIC for the graph fit
 BIC(s4_tabu_fit, s4clean)
 
 
-#======= Not Working ==========#
+#======= Not Working: Functional Programming Solution to multiple learning algo's ==========#
 
 #make a list of DAG's
 s4_dag_list<-list(s4manDAG,s4_hc,s4_tabu)
