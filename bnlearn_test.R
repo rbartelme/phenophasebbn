@@ -73,14 +73,21 @@ plot(s4_hc)
 s4_tabu <- tabu(s4clean, whitelist = wl, blacklist = bl, tabu = 10, max.tabu = 5)
 plot(s4_tabu)
 
-
-
 #================================================================
 # 3.) Parallel parameter learning (fitting data to DAG)
 #================================================================
 
+#make a list of DAG's
+s4_dag_list<-list(s4manDAG,s4_hc,s4_tabu)
 
+#define a function to operate over the list of networks for season4 data
+fit_net<-function(bn){
+  bn.fit(x=bn, data = s4clean, cluster = cl, method = "mle", keep.fitted = TRUE)
+}
 
+#use map from purrr to operate the bn.fit function over the list of DAG's
+  # output: a list of fitted BN's
+s4_fitted_list<-map(s4_dag_list,fit_net)
 #================================================================
 # 4.) Parallel cross-validation (validating fit of data to model)
 #================================================================
