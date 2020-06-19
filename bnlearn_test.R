@@ -35,7 +35,7 @@ s4clean[] <- lapply(s4clean, as.factor)
 s4manDAG <- empty.graph(data2include)
 
 #begin to encode edges and directions
-edges = matrix(c("cultivar", "canopy_height", "daily_gdd", "canopy_height", "precip_total", "canopy_height","vpd_mean","canopy_height","rh_mean", "canopy_height", "air_temp_mean","canopy_height"),
+edges = matrix(c("cultivar", "canopy_height", "daily_gdd", "canopy_height", "precip_total", "canopy_height","vpd_mean","canopy_height","rh_mean", "vpd_mean", "air_temp_mean","daily_gdd", "air_temp_mean","vpd_mean","precip_total","rh_mean"),
                ncol = 2, byrow = TRUE,
                dimnames = list(NULL, c("from", "to")))
 
@@ -79,7 +79,7 @@ plot(s4_tabu)
 
 #define a function to fit networks for season4 data with the same parameters
 fit_net<-function(bn){
-  bn.fit(x=bn, data = s4clean, cluster = cl, method = "mle", keep.fitted = TRUE)
+  bn.fit(x=bn, data = s4clean, cluster = cl, method = "mle", keep.fitted = TRUE, debug = TRUE)
 }
 
 #fit data to manual graph
@@ -94,12 +94,15 @@ s4_hc_fit <- fit_net(s4_hc)
 #bayesian information criterion of the fit
 BIC(s4_hc_fit, s4clean)
 
+#Result: -88021526
+
 #fit data to tabu graph
 s4_tabu_fit<-fit_net(s4_tabu)
 
 #BIC for the graph fit
 BIC(s4_tabu_fit, s4clean)
 
+#Result: -29592185
 
 #======= Not Working: Functional Programming Solution to multiple learning algo's ==========#
 
