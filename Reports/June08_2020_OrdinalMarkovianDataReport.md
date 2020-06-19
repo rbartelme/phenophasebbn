@@ -1,5 +1,5 @@
 ## Ordinal and Markovian Data Report:
-*by Ryan Bartelme, PhD - June 8th, 2020*
+*by Ryan Bartelme, PhD - June 19th, 2020*
 
 ---
 ### Rationale:
@@ -7,6 +7,23 @@
 * Plant growth is an ordinal output
 * Analyses do not account for time
 * Markovian timeseries may be necessary; ex. T = [t<sub>0</sub>, t<sub>1</sub>, ..., t<sub>n</sub>]
+
+---
+
+### Creating Custom Networks From Distributions
+
+* `bnlearn` has an [example](https://www.bnlearn.com/examples/custom/) of:
+  * how to fit models to gaussian variables
+  * probabilities of discrete variables
+  * specifying ordinality of data nodes
+
+#### Modeling Data for fitting to networks
+
+* models can be encoded between variables with `lm()`
+* `library(penalized)` can be used to fit ridge and elastic net regressions to your data
+  * However, the author of `bnlearn` states: `Note that using LASSO does not make sense in this context, all parents of a node are assumed to have non-zero coefficients or they would not be parents at all.`
+  * In the [vignette](https://cran.r-project.org/web/packages/penalized/vignettes/penalized.pdf) for penalized, the authors use an example with the `library(survival)`, which is similar to the approach below
+  * Based on Elmendorf *et al.*, 2019: [Time to branch out? Application of hierarchical survival models in plant phenology](https://www.sciencedirect.com/science/article/pii/S0168192319303107?via%3Dihub) it may be beneficial to model flag leaf emergence as a survival model
 
 ---
 
@@ -57,3 +74,7 @@ Hartemink's algorithm has been designed to deal with sets of homogeneous, contin
   * `B = n` where `n` is an integer corresponding to the number of permutations
 
 ---
+
+### Graph Structure Learning
+
+* [Graph Learning Review](https://www.annualreviews.org/doi/pdf/10.1146/annurev-statistics-060116-053803)
