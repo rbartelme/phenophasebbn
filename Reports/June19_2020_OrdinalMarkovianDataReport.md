@@ -51,8 +51,8 @@
       1. created an averaged network structure using arcs that appear with a frequency higher than a threshold estimated from the graphs themselves
       2. SNPs that were isolated nodes were dropped
       3. Missing data were imputed using the `impute` R package
-  * Results were similar to multivariate genomic best linear unbiased predictors, but were slightly more flexible in that there is no formal distinction between predictors and responses in Bayesian Networks 
-
+  * Results were similar to multivariate genomic best linear unbiased predictors, but were slightly more flexible in that there is no formal distinction between predictors and responses in Bayesian Networks
+  * It would be beneficial to search for code for the authors' analyses to see how the SNP data were preprocessed
 
 ---
 
