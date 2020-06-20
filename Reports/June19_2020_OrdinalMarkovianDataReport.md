@@ -30,6 +30,29 @@
 ### Prior Implementation of Bayesian Networks with `bnlearn` in plant phenomics
 
 * [Scutari *et al.*, *Genetics* 2014](https://www.genetics.org/content/genetics/198/1/129.full.pdf): *Multiple Quantitative Trait Analysis Using Bayesian Networks*
+  * Define variables as **X** = {*X*<sub>*i*</sub>} which includes
+    * *T* traits *X*<sub>*t1*</sub>, . . ., *X*<sub>*tT*</sub>
+    * *S* SNPs *X*<sub>*s1*</sub>, . . ., *X*<sub>*sS*</sub>
+    * The global distribution of all variables **X** can be decomposed into a set of *local distributions*
+  * Stated assumptions are as follows:
+    1. each variable *X*<sub>*i*</sub> is normally distributed, and **X** is a multivariate normal
+    2. Stochastic dependencies are assumed to be linear
+    3. traits can depend on SNPs but not *vise versa*, and the traits can depend on other traits
+    4. SNPs can depend on other SNPs
+  * Traits are also assumed to be temporally ordered
+  * When a graph *G* is sparse ordinary least squares (OLS) is used to estimate regression parameters (Equations 2 & 3 therein)
+  * When a graph *G* is dense, penalized estimators like ridge regression can be used; resulting in a flexible multivariate ridge regression
+  * The authors used `SI-HITON-PC` to learn the parents/children of each trait. This is similar to a single SNP analysis; and enabled the authors to filter out false positives. Dependencies were assessed with Student's t test for Pearson's correlation and `alpha = 0.01, 0.05, 0.10`
+    *  any markers that were not in a Markov Blanket *Beta*(*X*<sub>*ti*</sub>) were dropped from the model
+    * Optimal learned structures were found using *Bayesian Information Criterion*
+  * Parameter learning was done as follows:
+    * 10 runs of 10 fold cross validation on the learned BN
+    * To perform inference the authors used 100 networks obtained through the cross-validation
+      1. created an averaged network structure using arcs that appear with a frequency higher than a threshold estimated from the graphs themselves
+      2. SNPs that were isolated nodes were dropped
+      3. Missing data were imputed using the `impute` R package
+  * Results were similar to multivariate genomic best linear unbiased predictors, but were slightly more flexible in that there is no formal distinction between predictors and responses in Bayesian Networks 
+
 
 ---
 
@@ -78,3 +101,6 @@ Hartemink's algorithm has been designed to deal with sets of homogeneous, contin
 ### Graph Structure Learning
 
 * [Graph Learning Review](https://www.annualreviews.org/doi/pdf/10.1146/annurev-statistics-060116-053803)
+  * in depth review of undirected and directed graph structure learning without Bayesian Inference
+  * This is relevant to the `hc()` implementation with Maximum-Likelihood Estimates
+    * A possible novel extension or potential collaboration would be to extend the `bnlearn` package's capabilities RE: Bayesian inference on continuous datasets. As it is currently implemented the package will only allow Bayesian inference with discrete variables. Discretization of ordinal data is less than ideal.
