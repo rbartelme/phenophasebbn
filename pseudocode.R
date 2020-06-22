@@ -4,8 +4,6 @@ set.seed(1234)
 # load libraries
 library(parallel)
 library(bnlearn)
-library(caret)
-
 
 #It is highly likely that learning and fitting need to be parallelized
   # 04-13-20: added in parallelization points within pseudocode
