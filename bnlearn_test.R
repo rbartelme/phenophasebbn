@@ -78,40 +78,45 @@ plot(s4_tabu)
 #================================================================
 
 #define a function to fit networks for season4 data with the same parameters
-fit_net<-function(bn){
-  bn.fit(x=bn, data = s4clean, cluster = cl, method = "mle", keep.fitted = TRUE, debug = TRUE)
+#fit_net<-function(bn){
+  bn.fit(x=bn, data = s4clean, cluster = cl, method = "mle", keep.fitted = TRUE)
 }
 
-#fit data to manual graph
-s4_man_fit <- fit_net(s4manDAG)
+#fit data tomanual graph
+#s4_man_fit <- fit_net(s4manDAG)
+
+s4_man_fit2 <- bn.fit(s4manDAG, data = s4clean, cluster = cl, method = "mle", keep.fitted = TRUE)
+
 #Throws error:
 # Error in checkForRemoteErrors(val) : 
 # one node produced an error: attempting to create a table with more than INT_MAX cells. 
 
 #fit data to HC graph
-s4_hc_fit <- fit_net(s4_hc)
+#s4_hc_fit <- fit_net(s4_hc)
+
+
+s4_hc_fit2 <- bn.fit(s4_hc, data = s4clean, cluster = cl, method = "mle", keep.fitted = TRUE)
 
 #bayesian information criterion of the fit
-BIC(s4_hc_fit, s4clean)
+BIC(s4_hc_fit2, s4clean)
 
 #Result: -88021526
 
 #fit data to tabu graph
-s4_tabu_fit<-fit_net(s4_tabu)
+#s4_tabu_fit<-fit_net(s4_tabu)
+
+s4_tabu_fit2 <- bn.fit(s4_tabu, data = s4clean, cluster = cl, method = "mle", keep.fitted = TRUE)
+
 
 #BIC for the graph fit
-BIC(s4_tabu_fit, s4clean)
+BIC(s4_tabu_fit2, s4clean)
 
 #Result: -29592185
 
-#======= Not Working: Functional Programming Solution to multiple learning algo's ==========#
+#June 24: BIC are equal between hc and tabu, cluster seed is the same, but fit function throws error
 
-#make a list of DAG's
-s4_dag_list<-list(s4manDAG,s4_hc,s4_tabu)
+#removed FP fit solution, function deprecated
 
-#use map from purrr to operate the bn.fit function over the list of DAG's
-  # output: a list of fitted BN's
-s4_fitted_list<-map(s4_dag_list, fit_net)
 #================================================================
 # 4.) Parallel cross-validation (validating fit of data to model)
 #================================================================
