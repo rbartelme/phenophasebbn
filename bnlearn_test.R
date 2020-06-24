@@ -64,7 +64,7 @@ s4learnDAG <- empty.graph(data2include)
 #  Structure Learning Algorithms       #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# hill climb search *needs improvement
+# hill climb search
 s4_hc <- hc(s4clean, whitelist = wl, blacklist = bl)
 plot(s4_hc)
 
