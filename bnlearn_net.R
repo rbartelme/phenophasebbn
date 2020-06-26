@@ -194,3 +194,4 @@ plot(s4_cv_hc_bic, s4_cv_tabu_bic, s6_cv_hc_bic, s6_cv_tabu_bic, xlab = c("S4 HC
 # could also subset by "control treatment" and test vs. the Sorghum BAP
 # season 4 had a drought treatment, "unplanned experiment", 
 # August 1st was start of drought treatment
+# VPD and GDD alone instead of including RH and AIR temp
