@@ -1,6 +1,7 @@
 library(parallel)
 library(bnlearn)
 library(tidyverse)
+library(Rgraphviz)
 
 #================================================================
 # 1.) Setup parallel and dataset importation
@@ -124,9 +125,14 @@ BIC(s4_hc_fit2, s4clean)
 #Original Result: -88021526
 #New GDD Result: -97605837
 
-
 BIC(s6_hc_fit, s6clean)
 #-61928662
+
+# hamming distance of HC learned networks across seasons
+# set "true" network to be the one with the lowest BIC fit for its dataframe
+hamming(s6_hc,s4_hc) # distance = 6
+
+
 
 #fit data to tabu graph
 #s4_tabu_fit<-fit_net(s4_tabu)
@@ -135,7 +141,6 @@ s4_tabu_fit2 <- bn.fit(s4_tabu, data = s4clean, cluster = cl, method = "mle", ke
 
 s6_tabu_fit <- bn.fit(s6_tabu, data = s6clean, cluster = cl, method = "mle", keep.fitted = TRUE)
 
-
 #BIC for the graph fit
 BIC(s4_tabu_fit2, s4clean)
 #Old Result: -29592185
@@ -143,6 +148,11 @@ BIC(s4_tabu_fit2, s4clean)
 
 BIC(s6_tabu_fit, s6clean)
 # -61928662
+
+# hamming distance of tabu learned networks across seasons
+# set "true" network to be the one with the lowest BIC fit for its dataframe
+hamming(s6_tabu,s4_tabu) # distance = 6
+
 
 #June 24: BIC are equal between hc and tabu, cluster seed is the same, but fit function throws error
 #removed FP fit solution, function deprecated
