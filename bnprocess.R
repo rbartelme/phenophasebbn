@@ -17,11 +17,17 @@ season4tall <- as_tibble(season4tall)
 season6tall <- as_tibble(season6tall)
 
 #make wide format
-s4wide<- season4tall %>% mutate(row = row_number()) %>% pivot_wider(id_cols = c(row,lat,lon,date,range,column,cultivar), names_from = trait, values_from = value) %>%
+s4wide<- season4tall %>% mutate(row = row_number()) %>% pivot_wider(id_cols = c(row,lat,lon,date,range,column,cultivar,treatment), names_from = trait, values_from = value) %>%
   select(-row)
 
-s6wide<- season6tall %>% mutate(row = row_number()) %>% pivot_wider(id_cols = c(row,lat,lon,date,range,column,cultivar), names_from = trait, values_from = value) %>%
+treatcount<-count(season4tall, treatment)
+treatcount$treatment <- c("None","Aug 1-14", "Aug 15-30")
+barplot(height=treatcount$n,names=treatcount$treatment, ylim = c(0,350000), ylab = "Total Counts", xlab = "Treatment")
+
+s6wide<- season6tall %>% mutate(row = row_number()) %>% pivot_wider(id_cols = c(row,lat,lon,date,range,column,cultivar,treatment), names_from = trait, values_from = value) %>%
   select(-row)
+
+
 
 # ================================================================
 # Further data Cleaning Starts Here
