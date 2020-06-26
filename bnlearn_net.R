@@ -87,6 +87,14 @@ s6_hc <- hc(s6clean, start = sorgDAG, whitelist = wl, blacklist = bl)
 plot(s6_hc)
 
 
+s6_4_seed <- hc(s6clean, start = s4_hc, whitelist = wl, blacklist = bl)
+
+plot(s6_4_seed) #same as s4_hc result
+
+s4_6_seed <- hc(s4clean, start = s6_hc, whitelist = wl, blacklist = bl)
+
+plot(s4_6_seed) #same as s6_hc result
+
 # tabu greedy search
 s4_tabu <- tabu(s4clean, start = sorgDAG, whitelist = wl, blacklist = bl, tabu = 10, max.tabu = 5)
 plot(s4_tabu)
@@ -179,3 +187,7 @@ s6_cv_tabu_bic = bn.cv(s6clean, bn = "tabu", runs = 100, cluster = cl, algorithm
 # compare BIC and BDe scores with box plots
 plot(s4_cv_hc_bic, s4_cv_tabu_bic, s6_cv_hc_bic, s6_cv_tabu_bic, xlab = c("S4 HC", "S4 Tabu", "S6 HC","S6 Tabu"))
 
+# Notes: Possibly drop VPD?
+# Use season 4 graph to start with season 6 hc algorithm??
+# could also subset by "control treatment" and test vs. the Sorghum BAP
+# season 4 had a drought treatment, "unplanned experiment"
