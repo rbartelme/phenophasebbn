@@ -95,6 +95,8 @@ s4_6_seed <- hc(s4clean, start = s6_hc, whitelist = wl, blacklist = bl)
 
 plot(s4_6_seed) #same as s6_hc result
 
+hamming(s6_4_seed,s4_6_seed)
+
 # tabu greedy search
 s4_tabu <- tabu(s4clean, start = sorgDAG, whitelist = wl, blacklist = bl, tabu = 10, max.tabu = 5)
 plot(s4_tabu)
@@ -190,4 +192,5 @@ plot(s4_cv_hc_bic, s4_cv_tabu_bic, s6_cv_hc_bic, s6_cv_tabu_bic, xlab = c("S4 HC
 # Notes: Possibly drop VPD?
 # Use season 4 graph to start with season 6 hc algorithm??
 # could also subset by "control treatment" and test vs. the Sorghum BAP
-# season 4 had a drought treatment, "unplanned experiment"
+# season 4 had a drought treatment, "unplanned experiment", 
+# August 1st was start of drought treatment
