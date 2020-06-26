@@ -5,6 +5,8 @@ library(tidyverse)
 #================================================================
 # 1.) Setup parallel and dataset importation
 #================================================================
+# set seed for r env
+set.seed(42)
 # setup parallel cluster config
 # 48 cores
 cl = makeCluster(16)
@@ -13,6 +15,10 @@ clusterSetRNGStream(cl, 42)
 
 # read in season 4 data
 s4test<-read.table(file= "~/phenophasebbn/s4combined.txt", header = TRUE, sep = "\t", fill = TRUE)
+
+# read in season 6 data
+s6<-read.table(file="~/phenophasebbn/s6combined.txt", header = TRUE, sep = "\t", fill = TRUE)
+
 
 # test data
 data2include<-c("cultivar", "canopy_height",  "vpd_mean", "daily_gdd", "air_temp_mean", "rh_mean",
@@ -25,23 +31,29 @@ data2include<-c("cultivar", "canopy_height",  "vpd_mean", "daily_gdd", "air_temp
 #subset data by variables to include
 s4clean<-as.data.frame(s4test[, colnames(s4test) %in% data2include])
 
+s6clean<-as.data.frame(s6[, colnames(s6) %in% data2include])
+
 #convert everything in data frame to a factor for bnlearn interoperability
 s4clean[] <- lapply(s4clean, as.factor)
+s6clean[] <- lapply(s6clean, as.factor)
+
 
 #================================================================
 # 2a.) Define Structure (Heuristical DAG building)
 #================================================================
+#DEPRECATED!!!#
+
 #make an empty DAG
-s4manDAG <- empty.graph(data2include)
+#s4manDAG <- empty.graph(data2include)
 
 #begin to encode edges and directions
-edges = matrix(c("cultivar", "canopy_height", "daily_gdd", "canopy_height", "precip_total", "canopy_height","vpd_mean","canopy_height","rh_mean", "vpd_mean", "air_temp_mean","daily_gdd", "air_temp_mean","vpd_mean","precip_total","rh_mean"),
-               ncol = 2, byrow = TRUE,
-               dimnames = list(NULL, c("from", "to")))
+#edges = matrix(c("cultivar", "canopy_height", "daily_gdd", "canopy_height", "precip_total", "canopy_height","vpd_mean","canopy_height","rh_mean", "vpd_mean", "air_temp_mean","daily_gdd", "air_temp_mean","vpd_mean","precip_total","rh_mean"),
+#               ncol = 2, byrow = TRUE,
+#               dimnames = list(NULL, c("from", "to")))
 
 #manually assign edges to empty graph
-arcs(s4manDAG) = edges
-plot(s4manDAG)
+#arcs(s4manDAG) = edges
+#plot(s4manDAG)
 #================================================================
 # 2b.) Structure Learning (algorithmically build DAG)
 #================================================================
@@ -58,34 +70,41 @@ wl <- matrix(c("cultivar", "canopy_height", "daily_gdd", "canopy_height", "preci
              dimnames = list(NULL, c("from", "to")))
 
 #make an empty graph with wl & bl
-s4learnDAG <- empty.graph(data2include)
+sorgDAG <- empty.graph(data2include)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  Structure Learning Algorithms       #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#All start with an empty graph
+
 
 # hill climb search
-s4_hc <- hc(s4clean, whitelist = wl, blacklist = bl)
+s4_hc <- hc(s4clean, start = sorgDAG, whitelist = wl, blacklist = bl)
 plot(s4_hc)
+
+s6_hc <- hc(s6clean, start = sorgDAG, whitelist = wl, blacklist = bl)
+plot(s6_hc)
 
 
 # tabu greedy search
-s4_tabu <- tabu(s4clean, whitelist = wl, blacklist = bl, tabu = 10, max.tabu = 5)
+s4_tabu <- tabu(s4clean, start = sorgDAG, whitelist = wl, blacklist = bl, tabu = 10, max.tabu = 5)
 plot(s4_tabu)
 
+s6_tabu <- tabu(s6clean, start = sorgDAG, whitelist = wl, blacklist = bl, tabu = 10, max.tabu = 5)
+plot(s6tabu)
 #================================================================
 # 3.) Parallel parameter learning (fitting data to DAG)
 #================================================================
-
+#Deprecated!!!#
 #define a function to fit networks for season4 data with the same parameters
 #fit_net<-function(bn){
-  bn.fit(x=bn, data = s4clean, cluster = cl, method = "mle", keep.fitted = TRUE)
-}
+#  bn.fit(x=bn, data = s4clean, cluster = cl, method = "mle", keep.fitted = TRUE)
+#}
 
 #fit data tomanual graph
 #s4_man_fit <- fit_net(s4manDAG)
 
-s4_man_fit2 <- bn.fit(s4manDAG, data = s4clean, cluster = cl, method = "mle", keep.fitted = TRUE)
+#s4_man_fit2 <- bn.fit(s4manDAG, data = s4clean, cluster = cl, method = "mle", keep.fitted = TRUE)
 
 #Throws error:
 # Error in checkForRemoteErrors(val) : 
@@ -97,26 +116,46 @@ s4_man_fit2 <- bn.fit(s4manDAG, data = s4clean, cluster = cl, method = "mle", ke
 
 s4_hc_fit2 <- bn.fit(s4_hc, data = s4clean, cluster = cl, method = "mle", keep.fitted = TRUE)
 
+s6_hc_fit <- bn.fit(s6_hc, data = s6clean,  cluster = cl, method = "mle", keep.fitted = TRUE)
+
 #bayesian information criterion of the fit
 BIC(s4_hc_fit2, s4clean)
 
 #Result: -88021526
+
+BIC(s6_hc_fit, s6clean)
+
 
 #fit data to tabu graph
 #s4_tabu_fit<-fit_net(s4_tabu)
 
 s4_tabu_fit2 <- bn.fit(s4_tabu, data = s4clean, cluster = cl, method = "mle", keep.fitted = TRUE)
 
+s6_tabu_fit <- n.fit(s6_tabu, data = s4clean, cluster = cl, method = "mle", keep.fitted = TRUE)
+
 
 #BIC for the graph fit
 BIC(s4_tabu_fit2, s4clean)
-
 #Result: -29592185
 
-#June 24: BIC are equal between hc and tabu, cluster seed is the same, but fit function throws error
 
+BIC(s6_tabu_fit, s6clean)
+
+#June 24: BIC are equal between hc and tabu, cluster seed is the same, but fit function throws error
 #removed FP fit solution, function deprecated
 
 #================================================================
 # 4.) Parallel cross-validation (validating fit of data to model)
 #================================================================
+
+#Pseudocoded as of June 26 2020, need to discuss best strategy for implementation
+
+# BIC C-V
+cv.bic = bn.cv(df, bn = network_graph, k = 10, algorithm.args = list(score = "bic"))
+
+# BDe C-V
+cv.bde = bn.cv(df, bn = network_graph, k = 10, algorithm.args = list(score = "bde", iss = 1))
+
+# compare BIC and BDe scores with box plots
+plot(cv.bic, cv.bde, xlab = c("BIC", "BDe"))
+
