@@ -1,5 +1,5 @@
 ## Network Learning Cross Validation:
-*by Ryan Bartelme, PhD - June 23rd, 2020*
+*by Ryan Bartelme, PhD - June 25th, 2020*
 
 ---
 
