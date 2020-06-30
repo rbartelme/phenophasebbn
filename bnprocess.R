@@ -2,24 +2,28 @@
 library(dplyr)
 library(tidyr)
 
-#Ran on the Rockerverse Container on CyVerse VICE 05-08-2020
-#Also compatible with bnlearn_cpu on CyCervse VICE
 #read in season4 trait data tall format
-season4tall<-read.csv(file="~/phenophasebbn/season_4_tall_2020-05-08T203345.csv")
+season4tall <- read.csv(file = "~/phenophasebbn/season_4_tall_2020-05-08T203345.csv")
 
 #read in season6 trait data in tall format; this will need to be transfered via iRODS
 #Future code should have a shell script to pull data from cyverse data store into container
-season6tall<-read.csv(file="~/phenophasebbn/season_6_2020-06-25T204820.csv")
+season6tall <- read.csv(file = "~/phenophasebbn/season_6_2020-06-25T204820.csv")
 
 #convert to tibble
 season4tall <- as_tibble(season4tall)
 
 season6tall <- as_tibble(season6tall)
 
-#make wide format
-s4wide<- season4tall %>% mutate(row = row_number()) %>% pivot_wider(id_cols = c(row,lat,lon,date,range,column,cultivar,treatment), names_from = trait, values_from = value) %>%
+# make wide format
+s4wide <- season4tall %>% mutate(row = row_number()) %>% pivot_wider(id_cols = c(row,lat,lon,date,range,column,cultivar,treatment), names_from = trait, values_from = value) %>%
   select(-row)
 
+# find drought treatments
+drought <- as.vector(unique(s4wide$treatment)[2:3])
+
+# filter s4wide data frame with not in 
+
+# sanity check for season 4 treatments
 treatcount<-count(season4tall, treatment)
 treatcount$treatment <- c("None","Aug 1-14", "Aug 15-30")
 barplot(height=treatcount$n,names=treatcount$treatment, ylim = c(0,350000), ylab = "Total Counts", xlab = "Treatment")
