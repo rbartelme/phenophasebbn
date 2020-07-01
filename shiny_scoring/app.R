@@ -1,7 +1,7 @@
 library(shiny)
 library(tidyverse)
-#library(bnlearn)
-#library(graphviz)
+library(bnlearn)
+library(Rgraphviz)
 
 # ===========================================================
 # place holder HelloShiny example from
@@ -12,8 +12,14 @@ library(tidyverse)
 ui <- fluidPage(
 
   # App title ----
-  titlePanel("Hello Shiny!"),
+  titlePanel("Sorghum bicolor Bayesian Network"),
 
+# 07-01-2020 UI notes:
+# this is probably better as a "fluid row"
+# specify the rows to be the columns specified in the mockup svg
+# plot the network structure in the center
+# could pick site/seasons from a dynamic side column?
+# or this could be tabs at the top of the page
   # Sidebar layout with input and output definitions ----
   sidebarLayout(
 
@@ -42,8 +48,16 @@ ui <- fluidPage(
       # 3) subheading similarity of graphs from bnlearn function
         # This can be summarized with:
         # all.equal(A,B) - all nodes compared, returns boolean
-        # hamming() - will calculate the hamming distance between graph structures
+      # compare network structures
         # graphviz.compare()
+        # hamming() - will calculate the hamming distance between graph structures
+      # query function:
+      # this will need to be quite dynamic for the inputs
+      # elseif for storing event vector?
+        # cpquery(fitted,
+        # event = ((A >= 0) & (A <= 1)) & ((B >= 0) & (B <= 3)),
+        # evidence = (C + D < 10))
+
       # Output: Histogram ----
       plotOutput(outputId = "distPlot")
 
