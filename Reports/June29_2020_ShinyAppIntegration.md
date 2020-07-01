@@ -19,7 +19,20 @@
 * UI suggestions:
   * select output of query
   * number of nodes to query against
-  *
+  * Need to make UI use `cpquery` as below 
+
+#### **Example of `cpquery` function in `bnlearn`**
+
+```R
+## Gaussian Bayesian network.
+data(gaussian.test)
+fitted = bn.fit(hc(gaussian.test), gaussian.test)
+# the result should be around 0.04.
+cpquery(fitted,
+  event = ((A >= 0) & (A <= 1)) & ((B >= 0) & (B <= 3)),
+  evidence = (C + D < 10))
+
+```
 
 ### Notes on integration of Rscripts into App framework
 
