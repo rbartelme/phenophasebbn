@@ -12,14 +12,14 @@
 
 ### Draft layout of app and visualizations in Inkscape
 
-* draft image goes here
+<img src="./mock_ux_ui_layout.svg">
 
 * Users should be able to query the *Sorghum bicolor* BAP analysis to examine relationships using `cpquery` function
 
 * UI suggestions:
   * select output of query
   * number of nodes to query against
-  * Need to make UI use `cpquery` as below 
+  * Need to make UI use `cpquery` as below
 
 #### **Example of `cpquery` function in `bnlearn`**
 
@@ -56,6 +56,6 @@ cpquery(fitted,
   * This seems better to have been done previously and use the app to query the results
 
 * Could this be hosted on Shinyapps.io? Or permanently on CyVerse?
-  *
+
 
 * Document as a project on personal website
