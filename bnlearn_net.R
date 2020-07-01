@@ -7,7 +7,7 @@ library(Rgraphviz)
 # 1.) Setup parallel and dataset importation
 #================================================================
 # set seed for r env
-set.seed(42)
+set.seed(5)
 # setup parallel cluster config
 # 48 cores
 cl <- makeCluster(16)
