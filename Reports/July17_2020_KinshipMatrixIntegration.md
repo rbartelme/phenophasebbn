@@ -54,7 +54,6 @@ This is computationally intensive, due to large file size, but may be easier to 
 
 `bnlearn` only uses subnetworks to extract explicit elements from a network, it's not possible to combine networks explicitly.
 
-
 ---
 
 #### Graph Networks
