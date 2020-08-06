@@ -70,15 +70,28 @@ This project uses:
 
 ---
 
+#### Importing this repository into Docker Container environment
+
+1. Under the Rstudio menu "New Project", select "version control"
+
+2. In the next menu select "Git"
+
+3. Input the full url of this repo and the directory information should autopopulate
+
+4. Now the analyses can be run inside the container.
+
+5. Refer to the iRODS documentation on how the analysis outputs may be moved around in the CyVerse Data Store 
+
+---
 #### Running Bayesian Network Analysis
 
-  1. Load `bnlearn_test.R`
+  1. Load `bnlearn_run.R`
 
   2. Follow instructions in script to run network (this may take a few hours)
 
   3. Feel free to close the CyVerse Discovery Environment window until the network analysis finishes
 
-  4. Export `.pdf` file of graph structure from Script 
+  4. Export `.pdf` file of graph structure from Script
 
 ---
 
