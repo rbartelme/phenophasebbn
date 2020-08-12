@@ -11,6 +11,7 @@ set.seed(5)
 # setup parallel cluster config
 # 48 cores
 cl <- makeCluster(16)
+
 #set seed for the whole cluster
 clusterSetRNGStream(cl, 42)
 
@@ -24,8 +25,7 @@ s6 <- read.table(file = "~/phenophasebbn/s6combined.txt",
 #Note changed from daily GDD to GDD June 26 2020
 
 # test data
-data2include <- c("cultivar", "canopy_height", "vpd_mean", "gdd",
-        "air_temp_mean", "rh_mean", "precip_total")
+data2include <- c("cultivar", "canopy_height", "vpd_mean", "gdd", "precip_total")
 
 # ========================================================================
 #Improvement: future network versions should include time in a dynamic BBN
@@ -45,9 +45,9 @@ s6clean[] <- lapply(s6clean, as.factor)
 #================================================================
 
 # exclude derived data through "black list"
-bl <- matrix(c("rh_mean", "vpd_mean", "air_temp_mean", "vpd_mean"),
-             ncol = 2, byrow = TRUE,
-             dimnames = list(NULL, c("from", "to")))
+#bl <- matrix(c("rh_mean", "vpd_mean", "air_temp_mean", "vpd_mean"),
+#             ncol = 2, byrow = TRUE,
+#             dimnames = list(NULL, c("from", "to")))
 
 
 # include a priori links through "white list"
@@ -66,12 +66,14 @@ sorg_dag <- empty.graph(data2include)
 
 
 # hill climb search
-s4_hc <- hc(s4clean, start = sorg_dag, whitelist = wl, blacklist = bl)
+s4_hc <- hc(s4clean, start = sorg_dag, whitelist = wl)
 plot(s4_hc)
 
-s6_hc <- hc(s6clean, start = sorg_dag, whitelist = wl, blacklist = bl)
-plot(s6_hc)
 
+
+s6_hc <- hc(s6clean, start = sorg_dag, whitelist = wl)
+plot(s6_hc)
+hamming(s6_hc, s4_hc)
 
 s6_4_seed <- hc(s6clean, start = s4_hc, whitelist = wl, blacklist = bl)
 
