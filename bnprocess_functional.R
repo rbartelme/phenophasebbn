@@ -36,13 +36,18 @@ data2cut <- c("sitename", "treatment", "trait_description", "method_name",
               "units", "year", "station_number", "surface_temperature", "lodging_present")
 
 #Note: future network versions should include time in a dynamic BBN
-cut_data <- function(df){as.data.frame(df[, !(colnames(df) %in% data2cut)])}
+cut_data <- function(df){
+  j <- as.data.frame(df[, !(colnames(df) %in% data2cut)])
+  return(j)
+}
 
-
+#cut extraneous data from datasets
+cut_trait_data <- list()
+cut_trait_data <- map(.x = wide_trait_data, .f = cut_data)
 # ================================================================
 # 2) filter by cultivars in all data sets (including genomic)
 # ================================================================
-# read in cultivar lookup table
+# read in cultivar lookup table - this will also need wget
 all_cult <- read.csv(file = "~/phenophasebbn/cultivar_look_up_2020-05-22.csv")
 
 # convert to dataframe
@@ -54,34 +59,56 @@ cult_df <- as.data.frame(all_cult)
 cultivars4net <- cult_df[rowSums(cult_df[, 2:5]) == 4, 1]
 
 #define filter cultivar function
-filter_cultivar <- function(df){as.data.frame(df[df$cultivar %in% cultivars4net, ])}
+filter_cultivar <- function(df){
+  j <- as.data.frame(df[df$cultivar %in% cultivars4net, ])
+  return(j)
+}
 
+#filtered by cultivars
+filtered_trait_data <- list()
+filtered_trait_data <- map(.x = cut_trait_data, .f = filter_cultivar)
 
-#filter season4 dataset by cultivars in all datasets
-s4filtered <- as.data.frame(s4_df[s4_df$cultivar %in% cultivars4net, ])
-s6filtered <- as.data.frame(s6_df[s6_df$cultivar %in% cultivars4net, ])
 #remove all na canopy heights
-s4_df2 <- s4filtered[!is.na(s4filtered$canopy_height), ]
-s6_df2 <- s6filtered[!is.na(s6filtered$canopy_height), ]
+fix_canopy_height <- function(df){
+  j <- as.data.frame(df[!is.na(df$canopy_height), ])
+  return(j)
+}
+fixed_trait_data <- list()
+fixed_trait_data <- map(.x = filtered_trait_data, .f = fix_canopy_height)
+
 #convert season 4 dataframe to tibble
-s4_tib <- as_tibble(s4_df2)
-s6_tib <- as_tibble(s6_df2)
+trait_tibbs <- list()
+trait_tibbs <- map(.x = fixed_trait_data, .f = as_tibble())
+
 # ================================================================
 # 3) Join with weather data
 # ================================================================
 
-#read in weather data
-season4weather <- read.csv("~/phenophasebbn/season_4_weather_gdd2020-05-08T203153.csv")
-season6weather <- read.csv("~/phenophasebbn/weather_station_gdd_season_6_2020-06-25T205200.csv")
+weather_raw <- list("filepath1", "filepath2", "filepath3")
+
+# use map from purrr to read in csv files
+raw_weather_data <- map(.x = weather_raw, .f = read.csv())
 
 #left join weather and
-s4combined <- as.data.frame(left_join(s4_tib, season4weather, by = "date"))
-s6combined <- as.data.frame(left_join(s6_tib, season6weather, by = "date"))
+merge_trait_weather <- function(list_a, list_b){
+  if(length(list_a) == length(list_b)){
+    for(i in 1:length(list_a)){
+    m <- as.data.frame(left_join(list_a[[i]], list_b[[i]], by = "date"))
+    return(m)}
+  }else(print("Error: data frame list lengths are not equal."))
+}
 
+#add naming statement?
 
 #write out tsv file
-write.table(s4combined, file = "~/phenophasebbn/s4combined.txt",
-            quote = FALSE, sep = "\t")
 
-write.table(s6combined, file = "~/phenophasebbn/s6combined.txt",
-            quote = FALSE, sep = "\t")
+clean_write_out <- function(m){
+  for(i in 1:length(m)){
+  wd <- getwd()
+  df_name <- names(m[[i]])
+  location <- paste0(wd, '/', df_name, '.txt')
+  write.table(df, file = location, quote = FALSE, sep = "\t")
+  }
+}
+
+
