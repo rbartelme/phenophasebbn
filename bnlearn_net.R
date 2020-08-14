@@ -100,7 +100,9 @@ plot(s6_tabu)
 s4_hc_fit2 <- bn.fit(s4_hc, data = s4clean, cluster = cl,
   method = "mle", keep.fitted = TRUE)
 
-write.dot(file = "~/phenophasebbn/s4_august.dot", graph = s4_hc_fit2)
+write.dsc(file = "~/phenophasebbn/s4_august.dsc", fitted = s4_hc_fit2)
+system('gzip s4_august.dsc')
+
 
 s6_hc_fit <- bn.fit(s6_hc, data = s6clean,  cluster = cl,
   method = "mle", keep.fitted = TRUE)
@@ -170,8 +172,7 @@ s6_cv_tabu_bic <- bn.cv(s6clean, bn = "tabu", runs = 100, cluster = cl,
 
 
 # compare BIC and BDe scores with box plots
-plot(s4_cv_hc_bic, s4_cv_tabu_bic, s6_cv_hc_bic,
-    s6_cv_tabu_bic, xlab = c("S4 HC", "S4 Tabu", "S6 HC", "S6 Tabu"))
+plot(s4_cv_hc_bic, s4_cv_tabu_bic, xlab = c("S4 HC", "S4 Tabu"))
 
 # Notes: Possibly drop VPD?
 # Use season 4 graph to start with season 6 hc algorithm??
