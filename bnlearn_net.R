@@ -100,6 +100,8 @@ plot(s6_tabu)
 s4_hc_fit2 <- bn.fit(s4_hc, data = s4clean, cluster = cl,
   method = "mle", keep.fitted = TRUE)
 
+write.dot(file = "~/phenophasebbn/s4_august.dot", graph = s4_hc_fit2)
+
 s6_hc_fit <- bn.fit(s6_hc, data = s6clean,  cluster = cl,
   method = "mle", keep.fitted = TRUE)
 
