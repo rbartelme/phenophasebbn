@@ -42,15 +42,14 @@ This project uses:
   2. Execute `iinit` to begin iRODS setup for the [CyVerse Data Store](https://data.cyverse.org/)
 
   3. You will be prompted to enter the following:
-  - Enter the host name (DNS) of the server to connect to: `data.cyverse.org`
-  - Enter the port number: `1247`
   - Enter your irods user name: `(your CyVerse.org login)`
-  - Enter your irods zone: `iplant`
   - Enter your current iRODS password: `(your CyVerse password)`
 
   4. Input files may now be moved into the container environment with `iget`
 
   5. Files may be exported with `iput`
+  
+  6. Scripts in this repository that make calls to iRODS with the R function `system()` will now work
 
 ---
 
