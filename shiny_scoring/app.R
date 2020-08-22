@@ -8,6 +8,10 @@ library(Rgraphviz)
 # https://shiny.rstudio.com/tutorial/written-tutorial/lesson1/
 # ===========================================================
 
+# Begin preprocessing
+system("gunzip -d s4_august.dsc.gz")
+s4_hc <- read.dsc(file = "s4_august.dsc")
+
 # Define UI for app that draws a histogram ----
 ui <- fluidPage(
 
@@ -70,6 +74,7 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram ----
 server <- function(input, output) {
 
+
   # Histogram of the Old Faithful Geyser Data ----
   # with requested number of bins
   # This expression that generates a histogram is wrapped in a call
@@ -82,17 +87,17 @@ server <- function(input, output) {
   # The server function will be redefined by if elseif else statements
   # Similar to what was implemented in the AZCOVID text project
 
-  output$distPlot <- renderPlot({
+ # output$distPlot <- renderPlot({
 
-    x    <- faithful$waiting
-    bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-    hist(x, breaks = bins, col = "#75AADB", border = "white",
-         xlab = "Waiting time to next eruption (in mins)",
-         main = "Histogram of waiting times")
-
-    })
-
+#     x    <- faithful$waiting
+#     bins <- seq(min(x), max(x), length.out = input$bins + 1)
+# 
+#     hist(x, breaks = bins, col = "#75AADB", border = "white",
+#          xlab = "Waiting time to next eruption (in mins)",
+#          main = "Histogram of waiting times")
+# 
+#     })
+# 
 }
 
 #======================================
