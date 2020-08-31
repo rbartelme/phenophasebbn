@@ -65,25 +65,17 @@ sorg_dag <- empty.graph(data2include)
 #All start with an empty graph
 
 
-# hill climb search
+# hill climb search for season 4 data
 s4_hc <- hc(s4clean, start = sorg_dag, whitelist = wl)
 plot(s4_hc)
 
 
-
+#hill climb search for season 6 data
 s6_hc <- hc(s6clean, start = sorg_dag, whitelist = wl)
 plot(s6_hc)
+
+#find hamming distance between two networks
 hamming(s6_hc, s4_hc)
-
-s6_4_seed <- hc(s6clean, start = s4_hc, whitelist = wl, blacklist = bl)
-
-plot(s6_4_seed) #same as s4_hc result
-
-s4_6_seed <- hc(s4clean, start = s6_hc, whitelist = wl, blacklist = bl)
-
-plot(s4_6_seed) #same as s6_hc result
-
-hamming(s6_4_seed, s4_6_seed)
 
 # tabu greedy search
 s4_tabu <- tabu(s4clean, start = sorgDAG, whitelist = wl,
