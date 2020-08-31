@@ -92,9 +92,6 @@ plot(s6_tabu)
 s4_hc_fit2 <- bn.fit(s4_hc, data = s4clean, cluster = cl,
   method = "mle", keep.fitted = TRUE)
 
-write.dsc(file = "~/phenophasebbn/s4_august.dsc", fitted = s4_hc_fit2)
-system('gzip s4_august.dsc')
-
 
 s6_hc_fit <- bn.fit(s6_hc, data = s6clean,  cluster = cl,
   method = "mle", keep.fitted = TRUE)

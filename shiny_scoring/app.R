@@ -8,10 +8,8 @@ library(Rgraphviz)
 # https://shiny.rstudio.com/tutorial/written-tutorial/lesson1/
 # ===========================================================
 
-# Begin preprocessing
-system("gunzip -d s4_august.dsc.gz")
-s4_hc <- read.dsc(file = "s4_august.dsc")
-
+#load fitted network
+net <- s4_hc_fit2
 # Define UI for app that draws a histogram ----
 ui <- fluidPage(
 
@@ -24,6 +22,7 @@ ui <- fluidPage(
 # plot the network structure in the center
 # could pick site/seasons from a dynamic side column?
 # or this could be tabs at the top of the page
+
   # Sidebar layout with input and output definitions ----
   sidebarLayout(
 
@@ -34,11 +33,14 @@ ui <- fluidPage(
         #options are A_manual or B_learned
 
       # Input: Slider for the number of bins ----
-      sliderInput(inputId = "bins",
-                  label = "Number of bins:",
-                  min = 1,
-                  max = 50,
-                  value = 30)
+      selectInput(inputId = "Node",
+                  label = "Highlight Nodes:",
+                  choices = names(net),
+                  selected = NULL,
+                  multiple = TRUE,
+                  selectize = TRUE,
+                  width = NULL,
+                  size = NULL )
 
     ),
 
@@ -62,8 +64,8 @@ ui <- fluidPage(
         # event = ((A >= 0) & (A <= 1)) & ((B >= 0) & (B <= 3)),
         # evidence = (C + D < 10))
 
-      # Output: Histogram ----
-      plotOutput(outputId = "distPlot")
+      # Output: network plot
+      plotOutput(outputId = "netPlot")
 
     )
   )
@@ -73,31 +75,15 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram ----
 server <- function(input, output) {
+  #input$Node <- 
 
+  output$netPlot <- renderPlot({
+      #load fitted network graph (from bnlearn_script)
+   # if(is.null(input$Node)){
+      graphviz.plot(net) #}
+    #else() 
+    })
 
-  # Histogram of the Old Faithful Geyser Data ----
-  # with requested number of bins
-  # This expression that generates a histogram is wrapped in a call
-  # to renderPlot to indicate that:
-  #
-  # 1. It is "reactive" and therefore should be automatically
-  #    re-executed when inputs (input$bins) change
-  # 2. Its output type is a plot
-
-  # The server function will be redefined by if elseif else statements
-  # Similar to what was implemented in the AZCOVID text project
-
- # output$distPlot <- renderPlot({
-
-#     x    <- faithful$waiting
-#     bins <- seq(min(x), max(x), length.out = input$bins + 1)
-# 
-#     hist(x, breaks = bins, col = "#75AADB", border = "white",
-#          xlab = "Waiting time to next eruption (in mins)",
-#          main = "Histogram of waiting times")
-# 
-#     })
-# 
 }
 
 #======================================
