@@ -40,9 +40,8 @@ ui <- fluidPage(
                   multiple = TRUE,
                   selectize = TRUE,
                   width = NULL,
-                  size = NULL )
-
-    ),
+                  size = NULL ),
+      width = 3),
 
     # Main panel for displaying outputs ----
     mainPanel(
@@ -65,9 +64,9 @@ ui <- fluidPage(
         # evidence = (C + D < 10))
 
       # Output: network plot
-      plotOutput(outputId = "netPlot")
-
-    )
+      plotOutput(outputId = "netPlot", width = "100%",
+                 height = "666px"),
+          width = 9)
   )
 )
 
@@ -80,7 +79,13 @@ server <- function(input, output) {
   output$netPlot <- renderPlot({
       #load fitted network graph (from bnlearn_script)
    # if(is.null(input$Node)){
-      graphviz.plot(net) #}
+    g <- Rgraphviz::layoutGraph(bnlearn::as.graphNEL(net), layoutType = "dot")
+    graph::nodeRenderInfo(g) <- list(fontsize=20, shape = "circle",
+                                     height = 80, rWidth = 40, lWidth = 40,
+                                  fixedsize = FALSE)
+    graph::edgeRenderInfo(g) <- list(lwd = 3)
+    Rgraphviz::renderGraph(g)
+    #}
     #else() 
     })
 
