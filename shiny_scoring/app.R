@@ -2,6 +2,7 @@ library(shiny)
 library(tidyverse)
 library(bnlearn)
 library(Rgraphviz)
+library(shinythemes)
 
 # ===========================================================
 # place holder HelloShiny example from
@@ -11,10 +12,10 @@ library(Rgraphviz)
 #load fitted network
 net <- s4_hc_fit2
 # Define UI for app that draws a histogram ----
-ui <- fluidPage(
+ui <- fluidPage(theme = shinytheme("superhero"),
 
   # App title ----
-  titlePanel("Sorghum bicolor Bayesian Network"),
+  titlePanel(div(HTML("<em>Sorghum bicolor</em><br>Bayesian Network"))),
 
 # 07-01-2020 UI notes:
 # this is probably better as a "fluid row"
