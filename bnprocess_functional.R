@@ -2,30 +2,43 @@
 library(tidyverse)
 
 # add wget statements for tall format data
+#season four
+system('wget https://de.cyverse.org/dl/d/B3ADF887-BDE3-435B-9301-4C3FCB4F56F1/tall_season_four.csv')
+#season six (no change from raw data)
+system('wget https://de.cyverse.org/dl/d/FD84112F-FCEA-4089-8486-B1D19D71300B/mac_season_six_2020-04-22.csv')
+#ksu
+system('wget https://de.cyverse.org/dl/d/42CBC44A-7923-41D3-B1EA-E1DF3E5ACDCC/tall_ksu_data.csv')
+#clemson
+system('wget https://de.cyverse.org/dl/d/A5B5E73A-B528-4704-BD62-F9995AD5EDB4/tall_clemson_data.csv')
 
 # read in CSV filepaths as list
-data_path <- list("filepath1", "filepath2", "filepath3")
+data_path <- list("tall_season_four.csv", "mac_season_six_2020-04-22.csv", "tall_ksu_data.csv", "tall_clemson_data.csv")
 
-# use map from purrr to read in csv files
-raw_data <- map(.x = data_path, .f = read.csv())
+# use lapply to read in csv files from list
+  # note: function wrapper necessary to provide input argument to read.csv
+raw_data <- lapply(data_path, FUN = function(i){
+  read.csv(i, header=TRUE)})
 
-#convert to tibble
-raw_data <- map(.x = raw_data, .f = as_tibble())
+# name each dataframe in the list based on data_path list order
+names(raw_data) <- c("mac_season_4", "mac_season_6", "ksu", "clemson")
 
-# wide format data function
+#convert to tibble, needs indexing like above
+raw_data <- map(.x = raw_data, .f = function(i){as_tibble(i)})
+
+# wide format data function --- need to edit this to match whatever nomenclature is chosen
 first_pass <- function(i){
   j <- i %>%
     mutate(row = row_number()) %>%
     pivot_wider(id_cols = c(row, lat, lon, date,
-                            range, column, cultivar, treatment),
-                names_from = trait, values_from = value)   %>% 
+                            cultivar, treatment),
+                names_from = trait, values_from = mean)   %>% 
     select(-row)
   return(j)
 }
 
 #make a list of wide format tibbles
-wide_trait_data <- list()
-wide_trait_data <- map(.x = raw_data, .f = first_pass)
+wide_trait_data <- vector(mode = "list", length = length(raw_data))
+wide_trait_data <- lapply(raw_data, FUN = function(i){first_pass(i)})
 
 # ================================================================
 # 1) cut traits and environmental variables
@@ -35,6 +48,16 @@ wide_trait_data <- map(.x = raw_data, .f = first_pass)
 data2cut <- c("sitename", "treatment", "trait_description", "method_name",
               "units", "year", "station_number", "surface_temperature", "lodging_present")
 
+
+#column sanity check
+colnames(wide_trait_data$mac_season_4)
+colnames(wide_trait_data$mac_season_6) # no gdd_to_flowering in season 6 is this the right dataset??
+colnames(wide_trait_data$ksu)
+colnames(wide_trait_data$clemson) #plant_height needs to be canopy_height
+
+### need to rewrite this section for data to select
+
+
 #Note: future network versions should include time in a dynamic BBN
 cut_data <- function(df){
   j <- as.data.frame(df[, !(colnames(df) %in% data2cut)])
@@ -42,8 +65,8 @@ cut_data <- function(df){
 }
 
 #cut extraneous data from datasets
-cut_trait_data <- list()
-cut_trait_data <- map(.x = wide_trait_data, .f = cut_data)
+cut_trait_data <- vector(mode = "list", length = length(wide_trait_data))
+cut_trait_data <- map(.x = wide_trait_data, .f = function(df){cut_data(df)})
 # ================================================================
 # 2) filter by cultivars in all data sets (including genomic)
 # ================================================================
@@ -95,7 +118,7 @@ merge_trait_weather <- function(list_a, list_b){
     for(i in 1:length(list_a)){
     m <- as.data.frame(left_join(list_a[[i]], list_b[[i]], by = "date"))
     return(m)}
-  }else(print("Error: data frame list lengths are not equal."))
+  }else(print("Error: list of data frames are not of equal length."))
 }
 
 #add naming statement?
