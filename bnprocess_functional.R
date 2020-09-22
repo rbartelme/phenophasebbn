@@ -1,6 +1,10 @@
 #load libraries
 library(tidyverse)
 
+# ================================================================
+# 1) Trait data preprocessing 
+# ================================================================
+
 # add wget statements for tall format data
 #season four
 system('wget https://de.cyverse.org/dl/d/B3ADF887-BDE3-435B-9301-4C3FCB4F56F1/tall_season_four.csv')
@@ -41,45 +45,56 @@ wide_trait_data <- vector(mode = "list", length = length(raw_data))
 wide_trait_data <- lapply(raw_data, FUN = function(i){first_pass(i)})
 
 # ================================================================
-# 1) cut traits and environmental variables
+# 2) select traits 
 # ================================================================
 
-#make a vector of colnames to remove; lodging_present has no values, drop it
-data2cut <- c("sitename", "treatment", "trait_description", "method_name",
-              "units", "year", "station_number", "surface_temperature", "lodging_present")
+#change "plant_height" to canopy height for clemson data
+#assuming that plant height == canopy height
+wide_trait_data$clemson <- rename(wide_trait_data$clemson, canopy_height = plant_height)
+
+# add location variable for each dataframe
+# ex.  mac, clemson, ksu
+
+#mac season 4
+wide_trait_data$mac_season_4 <- add_column(wide_trait_data$mac_season_4,
+                          location = rep("mac", nrow(wide_trait_data$mac_season_4)))
+#mac season 6
+wide_trait_data$mac_season_6 <- add_column(wide_trait_data$mac_season_6,
+                                           location = rep("mac", nrow(wide_trait_data$mac_season_6)))
+#ksu
+wide_trait_data$ksu <- add_column(wide_trait_data$ksu,
+                                           location = rep("ksu", nrow(wide_trait_data$ksu)))
+
+#clemson
+wide_trait_data$clemson <- add_column(wide_trait_data$clemson,
+                                  location = rep("clemson", nrow(wide_trait_data$clemson)))
 
 
-#column sanity check
-colnames(wide_trait_data$mac_season_4)
-colnames(wide_trait_data$mac_season_6) # no gdd_to_flowering in season 6 is this the right dataset??
-colnames(wide_trait_data$ksu)
-colnames(wide_trait_data$clemson) #plant_height needs to be canopy_height
+#make a vector of colnames to use; these are shared across all 4 datasets
+data2use <- c("location", "date", "cultivar", "canopy_height")
+
 
 ### need to rewrite this section for data to select
-
-
-#Note: future network versions should include time in a dynamic BBN
-cut_data <- function(df){
-  j <- as.data.frame(df[, !(colnames(df) %in% data2cut)])
+select_data <- function(df){
+  j <- as.data.frame(df[, (colnames(df) %in% data2use)])
   return(j)
 }
 
 #cut extraneous data from datasets
-cut_trait_data <- vector(mode = "list", length = length(wide_trait_data))
-cut_trait_data <- map(.x = wide_trait_data, .f = function(df){cut_data(df)})
+filtered_trait_data <- vector(mode = "list", length = length(wide_trait_data))
+filtered_trait_data <- map(.x = wide_trait_data, .f = function(df){select_data(df)})
+
+
 # ================================================================
-# 2) filter by cultivars in all data sets (including genomic)
+# 3) filter by cultivars in all data sets (including genomic)
 # ================================================================
 # read in cultivar lookup table
-all_cult <- read.csv(file = "~/phenophasebbn/cultivar_look_up_2020-05-22.csv")
-
-# convert to dataframe
-cult_df <- as.data.frame(all_cult)
+all_cult <- read.csv(file = "~/phenophasebbn/cultivar_lookup_table.csv")
 
 # first column is a character vector of all cultivars present across all seasons
 # (0 = not in season, 1 = in season; therefore rowsum = 4 is in all)
 # make character vector of all cultivars in all seasons
-cultivars4net <- cult_df[rowSums(cult_df[, 2:5]) == 4, 1]
+cultivars4net <- as.vector(all_cult[all_cult$total_count == 5, 1])
 
 #define filter cultivar function
 filter_cultivar <- function(df){
@@ -88,20 +103,20 @@ filter_cultivar <- function(df){
 }
 
 #filtered by cultivars
-filtered_trait_data <- list()
-filtered_trait_data <- map(.x = cut_trait_data, .f = filter_cultivar)
+trait_data <- vector(mode = "list", length = length(filtered_trait_data))
+trait_data <- map(.x = filtered_trait_data, .f = function(df){filter_cultivar(df)})
 
 #remove all na canopy heights
 fix_canopy_height <- function(df){
   j <- as.data.frame(df[!is.na(df$canopy_height), ])
   return(j)
 }
-fixed_trait_data <- list()
-fixed_trait_data <- map(.x = filtered_trait_data, .f = fix_canopy_height)
+fixed_trait_data <- vector(mode = "list", length = length(trait_data))
+fixed_trait_data <- map(.x = trait_data, .f = function(i){fix_canopy_height(i)})
 
-#convert season 4 dataframe to tibble
-trait_tibbs <- list()
-trait_tibbs <- map(.x = fixed_trait_data, .f = as_tibble())
+#convert data frames in list to tibbles
+trait_tibbs <- vector(mode = "list", length = length(fixed_trait_data))
+trait_tibbs <- map(.x = fixed_trait_data, .f = function(i){as_tibble(i)})
 
 # ================================================================
 # 3) Join with weather data
@@ -117,7 +132,11 @@ weather_raw <- list("mac_season_4_weather.csv", "mac_season_6_weather.csv", "ksu
                     "clemson_weather.csv")
 
 # use map from purrr to read in csv files
-raw_weather_data <- map(.x = weather_raw, .f = read.csv())
+raw_weather_data <- map(.x = weather_raw, .f = function(i){read.csv(i)})
+
+#assign names to list of dataframes
+names(raw_weather_data) <- c("mac_season_4_weather", "mac_season_6_weather", 
+                             "ksu_weather", "clemson_weather")
 
 #left join weather and
 merge_trait_weather <- function(list_a, list_b){
@@ -127,8 +146,6 @@ merge_trait_weather <- function(list_a, list_b){
     return(m)}
   }else(print("Error: list of data frames are not of equal length."))
 }
-
-#add naming statement?
 
 #write out tsv file
 
