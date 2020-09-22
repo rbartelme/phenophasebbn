@@ -70,7 +70,7 @@ cut_trait_data <- map(.x = wide_trait_data, .f = function(df){cut_data(df)})
 # ================================================================
 # 2) filter by cultivars in all data sets (including genomic)
 # ================================================================
-# read in cultivar lookup table - this will also need wget
+# read in cultivar lookup table
 all_cult <- read.csv(file = "~/phenophasebbn/cultivar_look_up_2020-05-22.csv")
 
 # convert to dataframe
@@ -107,7 +107,14 @@ trait_tibbs <- map(.x = fixed_trait_data, .f = as_tibble())
 # 3) Join with weather data
 # ================================================================
 
-weather_raw <- list("filepath1", "filepath2", "filepath3")
+system('wget https://de.cyverse.org/dl/d/E11D3666-CD04-426F-B833-85DB6B39C574/mac_season_4_weather.csv')
+system('wget https://de.cyverse.org/dl/d/33B533EC-9EB0-4BB4-AAA2-650FAD4BD1D5/mac_season_6_weather.csv')
+system('wget https://de.cyverse.org/dl/d/F9FE37D0-BF57-4238-9F61-71C1D34B0B18/ksu_weather.csv')
+system('wget https://de.cyverse.org/dl/d/08675B05-F02E-4AB1-A934-8EFAD8DD3296/clemson_weather.csv')
+
+
+weather_raw <- list("mac_season_4_weather.csv", "mac_season_6_weather.csv", "ksu_weather.csv",
+                    "clemson_weather.csv")
 
 # use map from purrr to read in csv files
 raw_weather_data <- map(.x = weather_raw, .f = read.csv())
