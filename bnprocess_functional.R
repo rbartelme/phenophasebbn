@@ -21,7 +21,7 @@ data_path <- list("tall_season_four.csv", "mac_season_six_2020-04-22.csv", "tall
 # use lapply to read in csv files from list
   # note: function wrapper necessary to provide input argument to read.csv
 raw_data <- lapply(data_path, FUN = function(i){
-  read.csv(i, header=TRUE)})
+  read.csv(i, header=TRUE, stringsAsFactors = FALSE)})
 
 # name each dataframe in the list based on data_path list order
 names(raw_data) <- c("mac_season_4", "mac_season_6", "ksu", "clemson")
@@ -89,7 +89,8 @@ filtered_trait_data <- map(.x = wide_trait_data, .f = function(df){select_data(d
 # 3) filter by cultivars in all data sets (including genomic)
 # ================================================================
 # read in cultivar lookup table
-all_cult <- read.csv(file = "~/phenophasebbn/cultivar_lookup_table.csv")
+all_cult <- read.csv(file = "~/phenophasebbn/cultivar_lookup_table.csv", header = TRUE,
+                     stringsAsFactors = FALSE)
 
 # first column is a character vector of all cultivars present across all seasons
 # (0 = not in season, 1 = in season; therefore rowsum = 4 is in all)
@@ -119,7 +120,7 @@ trait_tibbs <- vector(mode = "list", length = length(fixed_trait_data))
 trait_tibbs <- map(.x = fixed_trait_data, .f = function(i){as_tibble(i)})
 
 # ================================================================
-# 3) Join with weather data
+# 4) Join with weather data
 # ================================================================
 
 system('wget https://de.cyverse.org/dl/d/E11D3666-CD04-426F-B833-85DB6B39C574/mac_season_4_weather.csv')
@@ -132,30 +133,61 @@ weather_raw <- list("mac_season_4_weather.csv", "mac_season_6_weather.csv", "ksu
                     "clemson_weather.csv")
 
 # use map from purrr to read in csv files
-raw_weather_data <- map(.x = weather_raw, .f = function(i){read.csv(i)})
+raw_weather_data <- map(.x = weather_raw, .f = function(i){read.csv(i, header = TRUE, stringsAsFactors = FALSE)})
 
 #assign names to list of dataframes
 names(raw_weather_data) <- c("mac_season_4_weather", "mac_season_6_weather", 
                              "ksu_weather", "clemson_weather")
+# colname sanity check
+colnames(raw_weather_data$mac_season_4_weather)
+colnames(raw_weather_data$mac_season_6_weather)
+colnames(raw_weather_data$ksu_weather)
+colnames(raw_weather_data$clemson_weather)
 
-#left join weather and
-merge_trait_weather <- function(list_a, list_b){
-  if(length(list_a) == length(list_b)){
-    for(i in 1:length(list_a)){
-    m <- as.data.frame(left_join(list_a[[i]], list_b[[i]], by = "date"))
-    return(m)}
-  }else(print("Error: list of data frames are not of equal length."))
+#convert weather data list of df's to tibbles
+weather_tibbs <- map(.x = raw_weather_data, .f = function(i){as_tibble(i)})
+
+#rename vpd values to just vpd
+for(i in 1:length(weather_tibbs)){
+colnames(weather_tibbs[[i]]) <- sub(pattern = "vpd_.*$",
+                                   replacement = "vpd", 
+     x = colnames(weather_tibbs[[i]]),
+     perl = TRUE)
 }
 
-#write out tsv file
+#weather data column check
+weather_cols <- vector(mode = "character", length = x)
+weather_cols <- map(weather_tibbs, colnames)
+weather_vec <- as.vector(unlist(weather_cols))
+weather_col_count <- as.data.frame(table(weather_vec))
 
-clean_write_out <- function(m){
-  for(i in 1:length(m)){
-  wd <- getwd()
-  df_name <- names(m[[i]])
-  location <- paste0(wd, '/', df_name, '.txt')
-  write.table(df, file = location, quote = FALSE, sep = "\t")
-  }
+#barplot of column names
+p<-ggplot(data=weather_col_count, aes(x=weather_vec, y=Freq)) +
+  geom_bar(stat = "identity", fill="steelblue")+
+  theme_minimal()+theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  xlab(NULL)
+p
+
+
+
+#need to select vpd and gdd only from weather data
+weather_subset <- vector(mode = "list", length = length(weather_tibbs))
+for(i in 1:length(weather_tibbs)){
+  weather_subset[[i]] <- weather_tibbs[[i]] %>% select(date, vpd, gdd)
 }
+names(weather_subset) <- c("mac_season_4_weather", "mac_season_6_weather", 
+                             "ksu_weather", "clemson_weather")
 
+#join subset weather data and trait data
+combined_tibbs <- vector(mode = "list", length = length(trait_tibbs))
+for(i in 1:length(trait_tibbs)){
+  combined_tibbs[[i]] <- as.data.frame(left_join(trait_tibbs[[i]],
+                            weather_subset[[i]], by = "date"), stringsasfactors = FALSE)
+}
+names(combined_tibbs) <- c("mac_season_4", "mac_season_6", "ksu", "clemson")
+
+colnames(combined_tibbs$mac_season_4)
+colnames(combined_tibbs$mac_season_6)
+colnames(combined_tibbs$ksu)
+colnames(combined_tibbs$clemson)
 
