@@ -9,132 +9,72 @@ library(Rgraphviz)
 # set seed for r env
 set.seed(5)
 # setup parallel cluster config
-# 48 cores
+# 16 cores
 cl <- makeCluster(16)
 
 #set seed for the whole cluster
 clusterSetRNGStream(cl, 42)
 
-# read in season 4 data
-s4test <- read.table(file = "~/phenophasebbn/s4combined.txt",
+# read in tabular data
+sorg_tab <- read.table(file = "~/phenophasebbn/bn_input.txt",
       header = TRUE, sep = "\t", fill = TRUE)
-# read in season 6 data
-s6 <- read.table(file = "~/phenophasebbn/s6combined.txt",
-      header = TRUE, sep = "\t", fill = TRUE)
+# ========================================================
+# debug missing weather data
+sorg_nas <- which(is.na(sorg_tab), arr.ind=TRUE)
+sorg_fix <- sorg_tab[sorg_nas[,1],]
+sorg_dates2fix <- as.data.frame(unique(sorg_fix[,c(1,4)]))
+# ========================================================
 
-#Note changed from daily GDD to GDD June 26 2020
+#Remove NA values, early/late dates have NA's
+sorg_tab <- na.omit(sorg_tab)
 
-# test data
-data2include <- c("cultivar", "canopy_height", "vpd_mean", "gdd", "precip_total")
-
-# ========================================================================
-#Improvement: future network versions should include time in a dynamic BBN
-# ========================================================================
-
-#subset data by variables to include
-s4clean <- as.data.frame(s4test[, colnames(s4test) %in% data2include])
-
-s6clean <- na.omit(as.data.frame(s6[, colnames(s6) %in% data2include]))
+#Need to drop date?
 
 #convert everything in data frame to a factor for bnlearn interoperability
-s4clean[] <- lapply(s4clean, as.factor)
-s6clean[] <- lapply(s6clean, as.factor)
+sorg_tab[] <- lapply(sorg_tab, as.factor)
 
 #================================================================
 # 2.) Structure Learning (algorithmically build DAG)
 #================================================================
 
-# exclude derived data through "black list"
-#bl <- matrix(c("rh_mean", "vpd_mean", "air_temp_mean", "vpd_mean"),
-#             ncol = 2, byrow = TRUE,
-#             dimnames = list(NULL, c("from", "to")))
-
-
 # include a priori links through "white list"
 wl <- matrix(c("cultivar", "canopy_height", "gdd", "canopy_height",
-              "precip_total", "canopy_height"),
+              "precip_cumulative", "canopy_height"),
              ncol = 2, byrow = TRUE,
              dimnames = list(NULL, c("from", "to")))
 
 #make an empty graph with wl & bl
-sorg_dag <- empty.graph(data2include)
+sorg_dag <- empty.graph(colnames(sorg_tab))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  Structure Learning Algorithms       #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#All start with an empty graph
+# starts with an empty graph: sorg_dag
 
 
-# hill climb search for season 4 data
-s4_hc <- hc(s4clean, start = sorg_dag, whitelist = wl)
-plot(s4_hc)
+# hill climb search for combined data graph structure
+sorg_hc <- hc(sorg_tab, start = sorg_dag, whitelist = wl)
+plot(sorg_hc)
 
 
-#hill climb search for season 6 data
-s6_hc <- hc(s6clean, start = sorg_dag, whitelist = wl)
-plot(s6_hc)
-
-#find hamming distance between two networks
-hamming(s6_hc, s4_hc)
-
-# tabu greedy search
-s4_tabu <- tabu(s4clean, start = sorgDAG, whitelist = wl,
-      blacklist = bl, tabu = 10, max.tabu = 5)
-plot(s4_tabu)
-
-s6_tabu <- tabu(s6clean, start = sorgDAG, whitelist = wl,
-      blacklist = bl, tabu = 10, max.tabu = 5)
-plot(s6_tabu)
 #================================================================
 # 3.) Parallel parameter learning (fitting data to DAG)
 #================================================================
 
-s4_hc_fit2 <- bn.fit(s4_hc, data = s4clean, cluster = cl,
-  method = "mle", keep.fitted = TRUE)
-
-
-s6_hc_fit <- bn.fit(s6_hc, data = s6clean,  cluster = cl,
+sorg_fit <- bn.fit(sorg_hc, data = s4clean, cluster = cl,
   method = "mle", keep.fitted = TRUE)
 
 #bayesian information criterion of the fit
-BIC(s4_hc_fit2, s4clean)
+BIC(sorg_fit, sorg_tab)
 
-#Original Result: -88021526
-#New GDD Result: -97605837
+# Old BIC results with just season 4 data
+# and the following features:
+# "cultivar", "canopy_height", "vpd_mean", "gdd", "precip_total"
+# Original Result: -88021526
+# June 2020, New GDD Result: -97605837
+#================================================================
+# September 2020, New features BIC Result: 
 
-BIC(s6_hc_fit, s6clean)
-#-61928662
-
-# hamming distance of HC learned networks across seasons
-# set "true" network to be the one with the lowest BIC fit for its dataframe
-hamming(s6_hc, s4_hc) # distance: 6
-
-
-
-#fit data to tabu graph
-s4_tabu_fit2 <- bn.fit(s4_tabu, data = s4clean, cluster = cl,
-          method = "mle", keep.fitted = TRUE)
-
-s6_tabu_fit <- bn.fit(s6_tabu, data = s6clean, cluster = cl,
-          method = "mle", keep.fitted = TRUE)
-
-#BIC for the graph fit
-BIC(s4_tabu_fit2, s4clean)
-#Old Result: -29592185
-#New GDD Result: -97605837
-
-BIC(s6_tabu_fit, s6clean)
-# -61928662
-
-# hamming distance of tabu learned networks across seasons
-# set "true" network to be the one with the lowest BIC fit for its dataframe
-hamming(s6_tabu, s4_tabu) # distance: 6
-
-
-# June 24: BIC are equal between hc and tabu,
-  # cluster seed is the same, but fit function throws error
-  # removed FP fit solution, function deprecated
-  # June 26: no fit function error
 
 #================================================================
 # 4.) Parallel cross-validation (validating fit of data to model)
