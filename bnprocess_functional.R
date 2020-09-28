@@ -123,10 +123,10 @@ trait_tibbs <- map(.x = fixed_trait_data, .f = function(i){as_tibble(i)})
 # 4) Join with weather data
 # ================================================================
 
-system('wget https://de.cyverse.org/dl/d/E11D3666-CD04-426F-B833-85DB6B39C574/mac_season_4_weather.csv')
-system('wget https://de.cyverse.org/dl/d/33B533EC-9EB0-4BB4-AAA2-650FAD4BD1D5/mac_season_6_weather.csv')
-system('wget https://de.cyverse.org/dl/d/F9FE37D0-BF57-4238-9F61-71C1D34B0B18/ksu_weather.csv')
-system('wget https://de.cyverse.org/dl/d/08675B05-F02E-4AB1-A934-8EFAD8DD3296/clemson_weather.csv')
+system('wget https://de.cyverse.org/dl/d/6D959379-0442-41FE-8BEE-890866ACF037/mac_season_4_weather.csv')
+system('wget https://de.cyverse.org/dl/d/C6219045-8114-4068-B924-8C2CD54AB9FD/mac_season_6_weather.csv')
+system('wget https://de.cyverse.org/dl/d/F53F6574-CE80-408E-B8C8-8983CB287F96/ksu_weather.csv')
+system('wget https://de.cyverse.org/dl/d/1EB28C81-10A1-4E1B-A406-1D0C6A20AF2D/clemson_weather.csv')
 
 
 weather_raw <- list("mac_season_4_weather.csv", "mac_season_6_weather.csv", "ksu_weather.csv",
