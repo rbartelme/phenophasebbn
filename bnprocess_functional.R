@@ -1,5 +1,6 @@
 #load libraries
 library(tidyverse)
+library(lubridate)
 
 # ================================================================
 # 1) Trait data preprocessing 
@@ -26,7 +27,7 @@ raw_data <- lapply(data_path, FUN = function(i){
 # name each dataframe in the list based on data_path list order
 names(raw_data) <- c("mac_season_4", "mac_season_6", "ksu", "clemson")
 
-#convert to tibble, needs indexing like above
+#convert to tibble
 raw_data <- map(.x = raw_data, .f = function(i){as_tibble(i)})
 
 # wide format data function --- need to edit this to match whatever nomenclature is chosen
@@ -119,6 +120,11 @@ fixed_trait_data <- map(.x = trait_data, .f = function(i){fix_canopy_height(i)})
 trait_tibbs <- vector(mode = "list", length = length(fixed_trait_data))
 trait_tibbs <- map(.x = fixed_trait_data, .f = function(i){as_tibble(i)})
 
+#fix dates in datasets
+for(i in 1:length(trait_tibbs)){
+trait_tibbs[[i]]$date <- as_date(trait_tibbs[[i]]$date)
+}
+
 # ================================================================
 # 4) Join with weather data
 # ================================================================
@@ -147,47 +153,25 @@ colnames(raw_weather_data$clemson_weather)
 #convert weather data list of df's to tibbles
 weather_tibbs <- map(.x = raw_weather_data, .f = function(i){as_tibble(i)})
 
-#rename vpd values to just vpd
+#convert dates in list to date object for join
 for(i in 1:length(weather_tibbs)){
-colnames(weather_tibbs[[i]]) <- sub(pattern = "vpd_.*$",
-                                   replacement = "vpd", 
-     x = colnames(weather_tibbs[[i]]),
-     perl = TRUE)
+  weather_tibbs[[i]]$date <- as_date(weather_tibbs[[i]]$date)
 }
 
-#weather data column check
-weather_cols <- vector(mode = "character", length = x)
-weather_cols <- map(weather_tibbs, colnames)
-weather_vec <- as.vector(unlist(weather_cols))
-weather_col_count <- as.data.frame(table(weather_vec))
+#join subset weather data and trait data, changed function to all weather data
 
-#barplot of column names
-p<-ggplot(data=weather_col_count, aes(x=weather_vec, y=Freq)) +
-  geom_bar(stat = "identity", fill="steelblue")+
-  theme_minimal()+theme(axis.text.x = element_text(angle = 90, hjust = 1))+
-  xlab(NULL)
-p
-
-
-
-#need to select vpd and gdd only from weather data
-weather_subset <- vector(mode = "list", length = length(weather_tibbs))
-for(i in 1:length(weather_tibbs)){
-  weather_subset[[i]] <- weather_tibbs[[i]] %>% select(date, vpd, gdd)
-}
-names(weather_subset) <- c("mac_season_4_weather", "mac_season_6_weather", 
-                             "ksu_weather", "clemson_weather")
-
-#join subset weather data and trait data
 combined_tibbs <- vector(mode = "list", length = length(trait_tibbs))
+
+#for loop to join as a dataframe
+
 for(i in 1:length(trait_tibbs)){
   combined_tibbs[[i]] <- as.data.frame(left_join(trait_tibbs[[i]],
-                            weather_subset[[i]], by = "date"), stringsasfactors = FALSE)
+                            weather_tibbs[[i]], by = "date"), stringsasfactors = FALSE)
 }
 names(combined_tibbs) <- c("mac_season_4", "mac_season_6", "ksu", "clemson")
 
-colnames(combined_tibbs$mac_season_4)
-colnames(combined_tibbs$mac_season_6)
-colnames(combined_tibbs$ksu)
-colnames(combined_tibbs$clemson)
+#combine all location dataframes
+bn_input <- bind_rows(combined_tibbs)
 
+write.table(bn_input, file = "~/phenophasebbn/bn_input.txt",
+            quote = FALSE, sep = "\t")
