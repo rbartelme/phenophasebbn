@@ -20,15 +20,25 @@ sorg_tab <- read.table(file = "~/phenophasebbn/bn_input.txt",
       header = TRUE, sep = "\t", fill = TRUE)
 # ========================================================
 # debug missing weather data
-sorg_nas <- which(is.na(sorg_tab), arr.ind=TRUE)
-sorg_fix <- sorg_tab[sorg_nas[,1],]
-sorg_dates2fix <- as.data.frame(unique(sorg_fix[,c(1,4)]))
+# sorg_nas <- which(is.na(sorg_tab), arr.ind=TRUE)
+# sorg_fix <- sorg_tab[sorg_nas[,1],]
+# sorg_dates2fix <- as.data.frame(unique(sorg_fix[,c(1,4)]))
 # ========================================================
 
 #Remove NA values, early/late dates have NA's
-sorg_tab <- na.omit(sorg_tab)
+sorg_tab <- as.data.frame(na.omit(sorg_tab))
 
-#Need to drop date?
+#convert date from factor to date class
+sorg_tab$date <- as.Date(sorg_tab$date)
+
+#convert to just year
+sorg_tab$date <- format(sorg_tab$date, "%Y")
+
+#rename date to year
+names(sorg_tab)[names(sorg_tab) == "date"] <- "year"
+
+#convert year to numeric
+sorg_tab$year <- as.numeric(sorg_tab$year)
 
 #convert everything in data frame to a factor for bnlearn interoperability
 sorg_tab[] <- lapply(sorg_tab, as.factor)
