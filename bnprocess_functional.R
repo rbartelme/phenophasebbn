@@ -170,6 +170,19 @@ for(i in 1:length(trait_tibbs)){
 }
 names(combined_tibbs) <- c("mac_season_4", "mac_season_6", "ksu", "clemson")
 
+
+  #combine all location dataframes
+bn_input <- bind_rows(combined_tibbs)
+
+write.table(bn_input, file = "~/phenophasebbn/bn_input.txt",
+            quote = FALSE, sep = "\t")
+
+#========================================================================
+# Modeling Sandbox
+# =======================================================================
+# Prototype Coding goes down here
+#
+#
 #### Model Features by Site
 # ============================================================
 # canopy height vs. GDD
@@ -267,8 +280,14 @@ for (r in r_eign$values) {
   print(r / sum(r_eign$values))
 }
 
-  #combine all location dataframes
-bn_input <- bind_rows(combined_tibbs)
+#==========================================================================
+# Genomic Data Reduction
+#==========================================================================
+sorg_ibs <- read.table(file = "~/phenophasebbn/all_seasons_distance_nonan.txt",
+                       sep = "\t", stringsAsFactors = FALSE, row.names = 1)
+colnames(sorg_ibs) <- row.names(sorg_ibs)
+sorg_ibs_mat <- as.matrix(sorg_ibs)
+sorg_ibs_dist <- as.dist(sorg_ibs_mat)
 
-write.table(bn_input, file = "~/phenophasebbn/bn_input.txt",
-            quote = FALSE, sep = "\t")
+#classical multidimensional scaling of SNP Centered IBS Matrix (Gower, 1966)
+snp_mds <- cmdscale(d = sorg_ibs_dist, k= 200, eig = TRUE)
