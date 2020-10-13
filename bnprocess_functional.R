@@ -170,7 +170,8 @@ for(i in 1:length(trait_tibbs)){
 }
 names(combined_tibbs) <- c("mac_season_4", "mac_season_6", "ksu", "clemson")
 
-
+write.table(combined_tibbs$mac_season_6, file = "~/phenophasebbn/season6_combined",
+            quote = FALSE, sep = "\t")
   #combine all location dataframes
 bn_input <- bind_rows(combined_tibbs)
 
@@ -263,14 +264,21 @@ ggplot(all_cultivars) +
 
 # Principle Component Analysis of VPD
 # vpd_mean pca scaled
-dist()
-s4_mds <- cmdscale(d = combined_tibbs$mac_season_4[,c(3,9,14,15)], eig = TRUE)
-
-
+bn_pca <- as.data.frame(na.omit(bn_input[,c(3,6:15)]))
+bn_num_pca <- prcomp(bn_pca, scale. = TRUE, center = TRUE)
 s4_test_pca <- prcomp(combined_tibbs$mac_season_4[,c(3,9,14,15)], scale. = TRUE)
 library(ggfortify)
 s4_pca_plot <- autoplot(s4_test_pca, data = combined_tibbs$mac_season_4[,2:17], colour = 'vpd_mean')
+bn_pca_plot <- autoplot(bn_num_pca, data = bn_pca, colour = 'vpd_mean',
+                        loadings = TRUE, loadings.colour = 'blue',
+                        loadings.label = TRUE, loadings.label.size = 3)
 
+bn_winnowed <- as.data.frame(na.omit(bn_input[,c(3,9,13,15)]))
+bn_winnowed_pca <- prcomp(bn_winnowed, scale. = TRUE, center = TRUE)
+bn_winnowed_pca_plot <- autoplot(bn_winnowed_pca, data = bn_pca, colour = 'vpd_mean',
+                        loadings = TRUE, loadings.colour = 'blue',
+                        loadings.label = TRUE, loadings.label.size = 3)
+bn_winnowed_pca_plot
 #calculate correlation matrix of numeric data
 R <- cor(combined_tibbs$mac_season_4[,c(3,9,13,14,15)])
 #find eigenvalues and eigenvectors for correlation matrix
@@ -291,3 +299,7 @@ sorg_ibs_dist <- as.dist(sorg_ibs_mat)
 
 #classical multidimensional scaling of SNP Centered IBS Matrix (Gower, 1966)
 snp_mds <- cmdscale(d = sorg_ibs_dist, k= 200, eig = TRUE)
+
+fit.weibull <- fitdist(bn_input$canopy_height, "weibull")
+qqplot(qweibull(ppoints(length(bn_input$canopy_height)), shape = 1.074721, 
+                        scale = 142.662183), bn_input$canopy_height)
