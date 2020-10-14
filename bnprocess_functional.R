@@ -34,7 +34,7 @@ raw_data <- map(.x = raw_data, .f = function(i){as_tibble(i)})
 first_pass <- function(i){
   j <- i %>%
     mutate(row = row_number()) %>%
-    pivot_wider(id_cols = c(row, lat, lon, date,
+    pivot_wider(id_cols = c(row, lat, lon, date, sitename,
                             cultivar, treatment),
                 names_from = trait, values_from = mean)   %>% 
     select(-row)
@@ -72,7 +72,7 @@ wide_trait_data$clemson <- add_column(wide_trait_data$clemson,
 
 
 #make a vector of colnames to use; these are shared across all 4 datasets
-data2use <- c("experiment", "date", "cultivar", "canopy_height")
+data2use <- c("sitename", "date", "cultivar", "canopy_height")
 
 
 ### need to rewrite this section for data to select
