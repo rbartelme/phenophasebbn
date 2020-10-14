@@ -16,7 +16,7 @@ RUN curl "http://ftp.se.debian.org/debian/pool/main/o/openssl/libssl1.0.0_1.0.1t
     rm libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
 
 # Install iCommands
-RUN wget https://files.renci.org/pub/irods/releases/4.1.10/ubuntu14/irods-icommands-4.1.10-ubuntu14-x86_64.deb && dpkg -i irods-icommands-4.1.10-ubuntu14-x86_64.deb
+# RUN wget https://files.renci.org/pub/irods/releases/4.1.10/ubuntu14/irods-icommands-4.1.10-ubuntu14-x86_64.deb && dpkg -i irods-icommands-4.1.10-ubuntu14-x86_64.deb
 
 ADD https://github.com/hairyhenderson/gomplate/releases/download/v2.5.0/gomplate_linux-amd64 /usr/bin/gomplate
 RUN chmod a+x /usr/bin/gomplate
@@ -24,11 +24,27 @@ RUN chmod a+x /usr/bin/gomplate
 # provide read and write access to Rstudio users for default R library location
 RUN chmod -R 777 /usr/local/lib/R/site-library
 
-# install additonal R libraries
-
-RUN R -e 'install.packages(c("bnlearn","markovchain","deal"), dependencies = TRUE)'
-
+# install bayesian network and pca plotting R libraries
+RUN R -e 'install.packages(c("bnlearn", "ggfortify"), repos = "https://cloud.r-project.org/", dependencies = TRUE)'
 RUN R -e 'BiocManager::install("Rgraphviz")'
+
+# rstan installs including clang-3.6 setup
+RUN apt-get install -y clang
+COPY install_stan.R install_stan.R
+RUN ["r", "install_stan.R"]
+
+# Installing the rest for stan
+RUN install2.r -s --error \
+bayesplot \
+brms \
+coda \
+loo \
+projpred \
+rstanarm \
+rstantools \
+shinystan \
+tidybayes
+
 
 ENV PASSWORD "rstudio1"
 RUN bash /etc/cont-init.d/userconf
