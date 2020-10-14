@@ -58,21 +58,21 @@ wide_trait_data$clemson <- rename(wide_trait_data$clemson, canopy_height = plant
 
 #mac season 4
 wide_trait_data$mac_season_4 <- add_column(wide_trait_data$mac_season_4,
-                          location = rep("mac", nrow(wide_trait_data$mac_season_4)))
+                          experiment = rep("mac_season_4", nrow(wide_trait_data$mac_season_4)))
 #mac season 6
 wide_trait_data$mac_season_6 <- add_column(wide_trait_data$mac_season_6,
-                                           location = rep("mac", nrow(wide_trait_data$mac_season_6)))
+                                           location = rep("mac_season_6", nrow(wide_trait_data$mac_season_6)))
 #ksu
 wide_trait_data$ksu <- add_column(wide_trait_data$ksu,
-                                           location = rep("ksu", nrow(wide_trait_data$ksu)))
+                                           experiment = rep("ksu", nrow(wide_trait_data$ksu)))
 
 #clemson
 wide_trait_data$clemson <- add_column(wide_trait_data$clemson,
-                                  location = rep("clemson", nrow(wide_trait_data$clemson)))
+                                  experiment = rep("clemson", nrow(wide_trait_data$clemson)))
 
 
 #make a vector of colnames to use; these are shared across all 4 datasets
-data2use <- c("location", "date", "cultivar", "canopy_height")
+data2use <- c("experiment", "date", "cultivar", "canopy_height")
 
 
 ### need to rewrite this section for data to select
@@ -170,8 +170,136 @@ for(i in 1:length(trait_tibbs)){
 }
 names(combined_tibbs) <- c("mac_season_4", "mac_season_6", "ksu", "clemson")
 
-#combine all location dataframes
+write.table(combined_tibbs$mac_season_6, file = "~/phenophasebbn/season6_combined",
+            quote = FALSE, sep = "\t")
+  #combine all location dataframes
 bn_input <- bind_rows(combined_tibbs)
 
 write.table(bn_input, file = "~/phenophasebbn/bn_input.txt",
             quote = FALSE, sep = "\t")
+
+#========================================================================
+# Modeling Sandbox
+# =======================================================================
+# Prototype Coding goes down here
+#
+#
+#### Model Features by Site
+# ============================================================
+# canopy height vs. GDD
+#use NLS with single trait data to fit all the variables
+# based on Kristina Riemer's tutorial: https://terraref.github.io/tutorials/combining-trait-weather-and-image-datasets.html
+# ============================================================
+single_cultivar <- combined_tibbs$mac_season_6[combined_tibbs$mac_season_6$cultivar == "PI656026" & 
+                                                 combined_tibbs$mac_season_6$canopy_height <= 200,]
+
+plot(single_cultivar$date, single_cultivar$gdd)
+plot(single_cultivar$date, single_cultivar$canopy_height)
+
+c <- 200
+a <- 0.1
+y <- single_cultivar$canopy_height[3]
+g <- single_cultivar$gdd[3]
+b <- ((log((c/y) - 1)) - a)/g
+model_single_cultivar <- nls(canopy_height ~ c / (1 + exp(a + b * gdd)), 
+                             start = list(c = c, a = a, b = b),
+                             data = single_cultivar)
+
+summary(model_single_cultivar)
+coef(model_single_cultivar)
+
+single_c <- coef(model_single_cultivar)[1]
+single_a <- coef(model_single_cultivar)[2]
+single_b <- coef(model_single_cultivar)[3]
+
+single_cultivar <- single_cultivar %>% 
+  mutate(mean_predict = single_c / (1 + exp(single_a + single_b * gdd)))
+ggplot(single_cultivar) +
+  geom_point(aes(x = gdd, y = canopy_height)) +
+  geom_line(aes(x = gdd, y = mean_predict), color = "orange") +
+  labs(x = "Cumulative growing degree days", y = "Canopy Height")
+
+
+#calculate inflection point of growth curve
+inf_y <- (as.numeric(single_c) - as.numeric(single_a)) / 2
+inf_x <- ((log((as.numeric(single_c) / inf_y) - 1)) - as.numeric(single_a)) / as.numeric(single_b)
+
+ggplot(single_cultivar) +
+  geom_point(aes(x = gdd, y = canopy_height)) +
+  geom_line(aes(x = gdd, y = mean_predict), color = "orange") +
+  geom_hline(yintercept = inf_y, linetype = "dashed") +
+  geom_vline(xintercept = inf_x) +
+  labs(x = "Cumulative growing degree days", y = "Canopy Height")
+
+all_cultivars <- c(day = as.double(), cultivar = as.character(), canopy_height = as.numeric(), 
+                   gdd_cum = as.numeric(), canopy_predict = as.numeric(), 
+                   inf_y = as.numeric(), inf_x = as.numeric())
+
+for(each_cultivar in unique(combined_tibbs$mac_season_6$cultivar)){
+  each_cultivar_df <- filter(combined_tibbs$mac_season_6, cultivar == each_cultivar)
+  each_cultivar_model <- nls(canopy_height ~ c / (1 + exp(a + b * gdd)), 
+                             start = list(c = c, a = a, b = b), 
+                             data = each_cultivar_df)
+  model_c <- coef(each_cultivar_model)[1]
+  model_a <- coef(each_cultivar_model)[2]
+  model_b <- coef(each_cultivar_model)[3]
+  each_cultivar_df <- each_cultivar_df %>% 
+    mutate(canopy_predict = model_c / (1 + exp(model_a + model_b * gdd)), 
+           inf_y = (as.numeric(model_c) - as.numeric(model_a)) / 2, 
+           inf_x = ((log((as.numeric(model_c) / inf_y) - 1)) - 
+                      as.numeric(single_a)) / as.numeric(single_b))
+  all_cultivars <- rbind(each_cultivar_df, all_cultivars)
+}
+
+ggplot(all_cultivars) +
+  geom_point(aes(x = gdd_cum, y = mean)) +
+  geom_line(aes(x = gdd_cum, y = mean_predict), color = "orange") +
+  facet_wrap(~cultivar, scales = "free_y") +
+  geom_hline(yintercept = inf_y, linetype = "dashed") +
+  geom_vline(xintercept = inf_x) +
+  labs(x = "Cumulative growing degree days", y = "Canopy Height")
+
+
+
+
+# Principle Component Analysis of VPD
+# vpd_mean pca scaled
+bn_pca <- as.data.frame(na.omit(bn_input[,c(3,6:15)]))
+bn_num_pca <- prcomp(bn_pca, scale. = TRUE, center = TRUE)
+s4_test_pca <- prcomp(combined_tibbs$mac_season_4[,c(3,9,14,15)], scale. = TRUE)
+library(ggfortify)
+s4_pca_plot <- autoplot(s4_test_pca, data = combined_tibbs$mac_season_4[,2:17], colour = 'vpd_mean')
+bn_pca_plot <- autoplot(bn_num_pca, data = bn_pca, colour = 'vpd_mean',
+                        loadings = TRUE, loadings.colour = 'blue',
+                        loadings.label = TRUE, loadings.label.size = 3)
+
+bn_winnowed <- as.data.frame(na.omit(bn_input[,c(3,9,13,15)]))
+bn_winnowed_pca <- prcomp(bn_winnowed, scale. = TRUE, center = TRUE)
+bn_winnowed_pca_plot <- autoplot(bn_winnowed_pca, data = bn_pca, colour = 'vpd_mean',
+                        loadings = TRUE, loadings.colour = 'blue',
+                        loadings.label = TRUE, loadings.label.size = 3)
+bn_winnowed_pca_plot
+#calculate correlation matrix of numeric data
+R <- cor(combined_tibbs$mac_season_4[,c(3,9,13,14,15)])
+#find eigenvalues and eigenvectors for correlation matrix
+r_eign <- eigen(R)
+
+for (r in r_eign$values) {
+  print(r / sum(r_eign$values))
+}
+
+#==========================================================================
+# Genomic Data Reduction
+#==========================================================================
+sorg_ibs <- read.table(file = "~/phenophasebbn/all_seasons_distance_nonan.txt",
+                       sep = "\t", stringsAsFactors = FALSE, row.names = 1)
+colnames(sorg_ibs) <- row.names(sorg_ibs)
+sorg_ibs_mat <- as.matrix(sorg_ibs)
+sorg_ibs_dist <- as.dist(sorg_ibs_mat)
+
+#classical multidimensional scaling of SNP Centered IBS Matrix (Gower, 1966)
+snp_mds <- cmdscale(d = sorg_ibs_dist, k= 200, eig = TRUE)
+
+fit.weibull <- fitdist(bn_input$canopy_height, "weibull")
+qqplot(qweibull(ppoints(length(bn_input$canopy_height)), shape = 1.074721, 
+                        scale = 142.662183), bn_input$canopy_height)
