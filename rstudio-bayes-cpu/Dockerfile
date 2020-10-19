@@ -1,6 +1,6 @@
-FROM rocker/verse:3.6.2
+FROM rocker/verse:4.0.0-ubuntu18.04
 
-# Pulls rocker rstudio R version 3.6.2
+# Pulls rocker rstudio R version 4.0 on ubuntu
 
 MAINTAINER "Ryan Bartelme rbartelme@arizona.edu"
 # This image uses the Rocker verse RStudio image - thanks R OpenSci!
@@ -27,19 +27,17 @@ RUN chmod -R 777 /usr/local/lib/R/site-library
 COPY install_stan.R install_stan.R
 RUN ["r", "install_stan.R"]
 
+USER rstudio
+RUN mkdir -p "${HOME}/.R"
+RUN echo "CXX14FLAGS=-O3 -march=native -mtune=native -fPIC" >> "${HOME}/.R/Makevars" ; \
+   echo "CXX14=clang++" >> "${HOME}/.R/Makevars"
+USER root
+
+
 # Installing the rest for stan
-RUN install2.r -s --error \
-bnlearn \
-ggfortify \
-bayesplot \
-brms \
-coda \
-loo \
-projpred \
-rstanarm \
-rstantools \
-shinystan \
-tidybayes
+RUN R -e 'install.packages(c("bnlearn","ggfortify", "bayesplot", "brms", \
+"coda", "loo", "projpred", "rstanarm", "rstantools", "shinystan", "tidybayes"), \
+repos = "https://cloud.r-project.org")'
 
 #install Rgraphviz from bioc
 RUN R -e 'BiocManager::install("Rgraphviz")'

@@ -16,4 +16,5 @@ cat("\nCXX14FLAGS=-O3 -march=native -mtune=native -fPIC",
 
 ## Installing rstan
 
-install.packages("rstan", type = "source")
+install.packages("rstan", repos = "https://cloud.r-project.org",
+      type = "source")
