@@ -18,9 +18,9 @@ s6_subset <- s6_subset[order(as.Date(s6_subset$date), s6_subset$sitename),]
 #setup for brm
 #rstan_options(auto_write = TRUE)
 test_brm <- brm(formula = canopy_height ~ gdd + cultivar + (1|sitename), family = lognormal(), data = s6_subset,
-                seed = 42, warmup = 1000, iter = 2000, chains = 4, cores = 4, 
-                control = list(adapt_delta = 0.95), save_model = 'season6.stan')
-
+                seed = 42, warmup = 1000, iter = 4000, chains = 4, cores = 4, 
+                control = list(adapt_delta = 0.95), save_model = 's6_highit.stan')
+plot(test_brm)
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #NOTES: 
 # general form for brm is:
