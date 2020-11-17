@@ -32,7 +32,25 @@ fit1 <- brm(bf(canopy_height ~ c / (1 + exp(a + b * gdd)),
 
 summary(fit1)
 
+sorg_priors2 <- prior(gamma(2, 2), lb = 0, nlpar = "b") +
+  prior(normal(350,50), nlpar = "c") 
 
+fit2 <- brm(bf(canopy_height ~ c / (1 + exp(b * gdd)), 
+          b + c ~ 1, nl = TRUE),
+       data = s6_subset, prior = sorg_priors2)
+
+summary(fit2)
+
+sorg_priors3 <- prior(normal(10, 5), nlpar = "a") +
+                 prior(gamma(2, 2), lb = 0, nlpar = "b") +
+                 prior(normal(350,50), nlpar = "c")
+
+fit3 <- brm(bf(canopy_height ~ c / (1 + exp(a + b * gdd)), 
+               a + b + c ~ 1, nl = TRUE),
+            data = s6_subset, prior = sorg_priors3,
+            control = list(adapt_delta = 0.99))
+
+summary(fit3)
 # storing the summary as a list of tables, one can extract the estimated values
 # for a, b, and c sorg_fit_sum$fixed[,1]
 #make dataframe to populate with a, b, c, and esimated inflection point output
