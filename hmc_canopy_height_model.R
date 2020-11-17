@@ -48,9 +48,10 @@ sorg_priors3 <- prior(normal(10, 5), nlpar = "a") +
 fit3 <- brm(bf(canopy_height ~ c / (1 + exp(a + b * gdd)), 
                a + b + c ~ 1, nl = TRUE),
             data = s6_subset, prior = sorg_priors3,
-            control = list(adapt_delta = 0.99))
+            control = list(adapt_delta = 0.85, stepsize = 5))
 
-summary(fit3)
+pairs(fit3)
+plot(fit3)
 # storing the summary as a list of tables, one can extract the estimated values
 # for a, b, and c sorg_fit_sum$fixed[,1]
 #make dataframe to populate with a, b, c, and esimated inflection point output
