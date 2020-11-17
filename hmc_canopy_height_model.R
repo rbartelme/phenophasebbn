@@ -8,32 +8,37 @@ set.seed(5)
 season6 <- na.omit(read.table(file = "~/phenophasebbn/season6_combined", sep = "\t", header = TRUE,
            stringsAsFactors = FALSE))
 
-#randomly sample 10 cultivars from the season for testing model
-s6_cultivars <- sample(unique(season6$cultivar), size = 10)
+#randomly sample 1 cultivar from the season for testing model
+s6_cultivars <- sample(unique(season6$cultivar), size = 1)
 
 #subset season6 dataframe by 10 randomly selected cultivars
 s6_subset <- season6[season6$cultivar %in% s6_cultivars,
                      colnames(season6) %in% c("sitename", "gdd", "canopy_height", "cultivar", "date")]
 s6_subset <- s6_subset[order(as.Date(s6_subset$date), s6_subset$sitename),]
-#setup for brm
-#rstan_options(auto_write = TRUE)
-test_brm <- brm(formula = canopy_height ~ gdd + cultivar + (1|sitename), family = lognormal(), data = s6_subset,
-                seed = 42, warmup = 1000, iter = 4000, chains = 4, cores = 4, 
-                control = list(adapt_delta = 0.95), save_model = 's6_highit.stan')
-plot(test_brm)
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#NOTES: 
-# general form for brm is:
-# response ~ pterms + (gterms | group)
-# where p are "population level terms, in this case, gdd.
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# however this is a complex hierarchical non-linear model, so best get to functional modeling:
-# the model for canopy height as a logistic growth function of gdd is:
-# canopy_height ~ c / (1 + exp(a + b * x)
-# x ~ gdd + (1|sitename|cultivar)
-# a ~ (1|sitename|cultivar)
-# b ~ (1|sitename|cultivar)
-# c ~ (1|sitename|cultivar)
-# gdd has a monotonic effect with regard to canopy_height
+#setup for brms
 
-ggplot(data = s6_subset, mapping = aes(x = gdd, y = canopy_height, colour = sitename))+geom_point()
+#specify priors for sorghum growth curves and variable assignments
+# prior requires a distribution, nlpar is the variable name
+# c is the max height
+# b is the growth rate
+sorg_priors <- prior(normal(10, 5), nlpar = "a") +
+  prior(normal(1, 0.5), nlpar = "b") +
+  prior(normal(350,50), nlpar = "c") 
+
+# specify the non-linear formula inside the fit function
+fit1 <- brm(bf(canopy_height ~ c / (1 + exp(a + b * gdd)), 
+               a + b + c ~ 1, nl = TRUE),
+            data = s6_subset, prior = sorg_priors)
+
+summary(fit1)
+
+
+# storing the summary as a list of tables, one can extract the estimated values
+# for a, b, and c sorg_fit_sum$fixed[,1]
+#make dataframe to populate with a, b, c, and esimated inflection point output
+# (c - a)/2
+# would equivalently be something like:
+# (fit1_summary$fixed[3,1]-fit1_summary$fixed[1,1])/2
+
+# for loop for cultivars
+
