@@ -21,37 +21,40 @@ s6_subset <- s6_subset[order(as.Date(s6_subset$date), s6_subset$sitename),]
 # prior requires a distribution, nlpar is the variable name
 # c is the max height
 # b is the growth rate
-sorg_priors <- prior(normal(10, 5), nlpar = "a") +
-  prior(normal(1, 0.5), nlpar = "b") +
-  prior(normal(350,50), nlpar = "c") 
-
-# specify the non-linear formula inside the fit function
-fit1 <- brm(bf(canopy_height ~ c / (1 + exp(a + b * gdd)), 
-               a + b + c ~ 1, nl = TRUE),
-            data = s6_subset, prior = sorg_priors)
-
-summary(fit1)
-
+# sorg_priors <- prior(normal(10, 5), nlpar = "a") +
+#   prior(normal(1, 0.5), nlpar = "b") +
+#   prior(normal(350,50), nlpar = "c") 
+# 
+# # specify the non-linear formula inside the fit function
+# fit1 <- brm(bf(canopy_height ~ c / (1 + exp(a + b * gdd)), 
+#                a + b + c ~ 1, nl = TRUE),
+#             data = s6_subset, prior = sorg_priors)
+# 
+# summary(fit1)
+# 
 sorg_priors2 <- prior(gamma(2, 2), lb = 0, nlpar = "b") +
-  prior(normal(350,50), nlpar = "c") 
+  prior(normal(350,50), nlpar = "c")
 
-fit2 <- brm(bf(canopy_height ~ c / (1 + exp(b * gdd)), 
+fit2 <- brm(bf(canopy_height ~ c / (1 + exp(b * gdd)),
           b + c ~ 1, nl = TRUE),
-       data = s6_subset, prior = sorg_priors2)
-
+          data = s6_subset, prior = sorg_priors2,
+          control = list(adapt_delta = 0.85, stepsize = 0.5),
+          cores = 4, thin = 5, iter = 100000)
+# 
 summary(fit2)
 
-sorg_priors3 <- prior(normal(10, 5), nlpar = "a") +
-                 prior(gamma(2, 2), lb = 0, nlpar = "b") +
-                 prior(normal(350,50), nlpar = "c")
-
-fit3 <- brm(bf(canopy_height ~ c / (1 + exp(a + b * gdd)), 
-               a + b + c ~ 1, nl = TRUE),
-            data = s6_subset, prior = sorg_priors3,
-            control = list(adapt_delta = 0.85, stepsize = 5))
-
-pairs(fit3)
-plot(fit3)
+# sorg_priors3 <- prior(normal(10, 5), nlpar = "a") +
+#                  prior(gamma(2, 2), lb = 0, nlpar = "b") +
+#                  prior(normal(350,50), nlpar = "c")
+# 
+# fit3 <- brm(bf(canopy_height ~ c / (1 + exp(a + b * gdd)), 
+#                a + b + c ~ 1, nl = TRUE),
+#             data = s6_subset, prior = sorg_priors3,
+#             control = list(adapt_delta = 0.9, stepsize = 0.5), iter = 10000)
+# 
+# pairs(fit3)
+# plot(fit3)
+# summary(fit3)
 # storing the summary as a list of tables, one can extract the estimated values
 # for a, b, and c sorg_fit_sum$fixed[,1]
 #make dataframe to populate with a, b, c, and esimated inflection point output
