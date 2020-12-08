@@ -25,7 +25,8 @@ raw_data <- lapply(data_path, FUN = function(i){
   read.csv(i, header=TRUE, stringsAsFactors = FALSE)})
 
 # name each dataframe in the list based on data_path list order
-names(raw_data) <- c("mac_season_4", "mac_season_6", "ksu", "clemson")
+experiments <- c("mac_season_4", "mac_season_6", "ksu", "clemson")
+names(raw_data) <- experiments
 
 #convert to tibble
 raw_data <- map(.x = raw_data, .f = function(i){as_tibble(i)})
@@ -44,7 +45,7 @@ first_pass <- function(i){
 #make a list of wide format tibbles
 wide_trait_data <- vector(mode = "list", length = length(raw_data))
 wide_trait_data <- lapply(raw_data, FUN = function(i){first_pass(i)})
-
+names(wide_trait_data) <- experiments
 # ================================================================
 # 2) select traits 
 # ================================================================
@@ -53,24 +54,24 @@ wide_trait_data <- lapply(raw_data, FUN = function(i){first_pass(i)})
 #assuming that plant height == canopy height
 wide_trait_data$clemson <- rename(wide_trait_data$clemson, canopy_height = plant_height)
 
-# add location variable for each dataframe
-# ex.  mac, clemson, ksu
-
-#mac season 4
-wide_trait_data$mac_season_4 <- add_column(wide_trait_data$mac_season_4,
-                          experiment = rep("mac_season_4", nrow(wide_trait_data$mac_season_4)))
-#mac season 6
-wide_trait_data$mac_season_6 <- add_column(wide_trait_data$mac_season_6,
-                                           location = rep("mac_season_6", nrow(wide_trait_data$mac_season_6)))
-#ksu
-wide_trait_data$ksu <- add_column(wide_trait_data$ksu,
-                                           experiment = rep("ksu", nrow(wide_trait_data$ksu)))
-
-#clemson
-wide_trait_data$clemson <- add_column(wide_trait_data$clemson,
-                                  experiment = rep("clemson", nrow(wide_trait_data$clemson)))
-
-
+# # add location variable for each dataframe
+# # ex.  mac, clemson, ksu
+# 
+# #mac season 4
+# wide_trait_data$mac_season_4 <- add_column(wide_trait_data$mac_season_4,
+#                           experiment = rep("mac_season_4", nrow(wide_trait_data$mac_season_4)))
+# #mac season 6
+# wide_trait_data$mac_season_6 <- add_column(wide_trait_data$mac_season_6,
+#                                            location = rep("mac_season_6", nrow(wide_trait_data$mac_season_6)))
+# #ksu
+# wide_trait_data$ksu <- add_column(wide_trait_data$ksu,
+#                                            experiment = rep("ksu", nrow(wide_trait_data$ksu)))
+# 
+# #clemson
+# wide_trait_data$clemson <- add_column(wide_trait_data$clemson,
+#                                   experiment = rep("clemson", nrow(wide_trait_data$clemson)))
+# 
+# 
 #make a vector of colnames to use; these are shared across all 4 datasets
 data2use <- c("sitename", "date", "cultivar", "canopy_height")
 
@@ -84,7 +85,7 @@ select_data <- function(df){
 #cut extraneous data from datasets
 filtered_trait_data <- vector(mode = "list", length = length(wide_trait_data))
 filtered_trait_data <- map(.x = wide_trait_data, .f = function(df){select_data(df)})
-
+names(filtered_trait_data) <- experiments
 
 # ================================================================
 # 3) filter by cultivars in all data sets (including genomic)
@@ -168,11 +169,29 @@ for(i in 1:length(trait_tibbs)){
   combined_tibbs[[i]] <- as.data.frame(left_join(trait_tibbs[[i]],
                             weather_tibbs[[i]], by = "date"), stringsasfactors = FALSE)
 }
-names(combined_tibbs) <- c("mac_season_4", "mac_season_6", "ksu", "clemson")
+names(combined_tibbs) <- experiments
 
-write.table(combined_tibbs$mac_season_6, file = "~/phenophasebbn/season6_combined",
+#only unique dates + sitename
+combined_tibbs_unq <- vector(mode = "list", length = length(combined_tibbs))
+
+#mac and KSU seasons unique by site + date
+for(i in 1:3){
+combined_tibbs_unq[[i]] <- combined_tibbs[[i]] %>% distinct(date, sitename, .keep_all = TRUE)
+}
+
+#keep clemson as is
+combined_tibbs_unq[[4]] <- combined_tibbs[[4]]
+#name list items
+names(combined_tibbs_unq) <- experiments
+#sanity check dimensions, appears that the size is cut in half for each dataframe
+dim(combined_tibbs_unq[[2]])
+dim(combined_tibbs[[2]])
+
+#write out season6 for growth curves
+write.table(combined_tibbs_unq$mac_season_6, file = "~/phenophasebbn/season6_combined.txt",
             quote = FALSE, sep = "\t")
-  #combine all location dataframes
+
+#combine all location dataframes
 bn_input <- bind_rows(combined_tibbs)
 
 write.table(bn_input, file = "~/phenophasebbn/bn_input.txt",

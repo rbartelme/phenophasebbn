@@ -5,7 +5,7 @@ library(brms)
 #set seed for R's random sample
 set.seed(5)
 # read in season 6 wide format dataframe
-season6 <- na.omit(read.table(file = "~/phenophasebbn/season6_combined", sep = "\t", header = TRUE,
+season6 <- na.omit(read.table(file = "~/phenophasebbn/season6_combined.txt", sep = "\t", header = TRUE,
            stringsAsFactors = FALSE))
 
 
@@ -13,10 +13,31 @@ season6 <- na.omit(read.table(file = "~/phenophasebbn/season6_combined", sep = "
 s6_cultivars <- sample(unique(season6$cultivar), size = 1)
 
 #subset season6 dataframe by 10 randomly selected cultivars
-s6_subset <- season6[season6$cultivar %in% s6_cultivars,
-                     colnames(season6) %in% c("sitename", "gdd", "canopy_height", "cultivar", "date")]
-s6_subset <- s6_subset[order(as.Date(s6_subset$date), s6_subset$sitename),]
-#setup for brms
+s6_subset <- season6 %>%  filter(cultivar %in% s6_cultivars) %>% 
+  select(sitename, gdd, canopy_height, cultivar, date) %>% 
+  arrange(date)
+
+ggplot(data = s6_subset, aes(gdd, canopy_height, color = cultivar, group = sitename)) +
+  geom_point() + 
+  geom_smooth()
+
+
+# s6_subset <- s6_subset[order(as.Date(s6_subset$date), s6_subset$sitename),]
+# s6_subset_sites <- split(s6_subset, s6_subset$sitename, drop = TRUE)
+# 
+# canopy_summary <- vector(mode = "list", length = length(s6_subset_sites))
+# date_fixed <- vector(mode = "list", length = length(s6_subset_sites))
+# names(canopy_summary) <- names(s6_subset_sites)
+# names(date_fixed) <- names(s6_subset_sites)
+# 
+# for(i in 1:length(s6_subset_sites)){
+# date_fixed[[i]] <- distinct(s6_subset_sites[[i]], date, .keep_all = TRUE)
+# canopy_summary[[i]] <- summary(date_fixed[[i]]$canopy_height)
+# }
+# #(as.numeric(canopy_summary[[1]][5] - as.numeric(canopy_summary[[1]][2]))/
+# s6_subset_sites[[1]]   
+
+# #setup for brms
 
 #specify priors for sorghum growth curves and variable assignments
 # prior requires a distribution, nlpar is the variable name
@@ -34,18 +55,35 @@ s6_subset <- s6_subset[order(as.Date(s6_subset$date), s6_subset$sitename),]
 # summary(fit1)
 # 
 
+#need to adjust random start, step size, and step jitter
 
 #single cultivar debug
-sorg_priors2 <- prior(gamma(2, 2), lb = 0.01, nlpar = "b") +
+sorg_priors2 <- prior(normal(10, 2),  lb = 0, class = 'b',  nlpar = "a") +
+  prior(gamma(2, 2), lb = 0.01, nlpar = "b") +
   prior(gamma(130, 0.35), lb = 300, nlpar = "c")
 
-fit2 <- brm(bf(canopy_height ~ c / (1 + exp(b * gdd)),
-          b + c ~ 1, nl = TRUE),
-          data = s6_subset, prior = sorg_priors2,
-          control = list(adapt_delta = 0.99),
-          cores = 4, thin = 5, iter = 20000, seed = 42)
-#
-summary(fit2)
+
+fit3 <- brm(bf(canopy_height ~ a + c / (1 + exp(b * gdd)), 
+               b + c ~ (1|gr(sitename, cor = FALSE)),
+               a ~ 1,
+               nl = TRUE,
+               center = TRUE),
+            data = s6_subset, prior = sorg_priors2,
+            control = list(adapt_delta = 0.99), 
+            chains = 4,
+            cores = 4, 
+            thin = 5, 
+            iter = 20000, seed = 42)
+
+
+# 
+# fit2 <- brm(bf(canopy_height ~ c / (1 + exp(b * gdd)),
+#           b + c ~ 1, nl = TRUE),
+#           data = s6_subset, prior = sorg_priors2,
+#           control = list(adapt_delta = 0.99),
+#           cores = 4, thin = 5, iter = 20000, seed = 42)
+# #
+# summary(fit2)
 # 
 
 
@@ -60,30 +98,34 @@ summary(fit2)
 #make season6 dataframe into a list of data frames for each cultivar
 s6_cultivar_list <- split(season6, season6$cultivar, drop = TRUE)
 
+
+
+
+
 #hmc output for each cultivar
-hmc_out <- data.frame(cultivar = character(),
-                      est_growth_rate = numeric(), 
-                      est_max_growth = numeric(),
-                      measured_max_growth = numeric(),
-                      sd_est_meas_max_growth = numeric(),
-                      est_inflection_point = numeric(),
+N <- length(s6_cultivar_list)
+hmc_out <- data.frame(cultivar = character(N),
+                      est_growth_rate = numeric(N), 
+                      est_max_growth = numeric(N),
+                      measured_max_growth = numeric(N),
                       stringsAsFactors=FALSE) 
+gen_sorg_priors <- prior(gamma(2, 2.5), lb = 0.01, nlpar = "b") +
+  prior(gamma(130, 0.35), lb = 250, nlpar = "c")
 
-gen_sorg_priors <- prior(gamma(2, 2), lb = 0.01, nlpar = "b") +
-  prior(gamma(130, 0.35), lb = 300, nlpar = "c")
-
-for(i in 1:length(s6_cultivar_list)){
-  hmc_out[i,1] <- names(s6_cultivar_list)[[i]] #store cultivar name
+find_growth_params <- function(li, pref){for(i in 1:length(li)){
+  hmc_out[i,1] <- names(li)[[i]] #store cultivar name
+  stanout <- paste0(pref, names(li)[[i]]) #name stan file output
   #run brms for cultivar with generalized priors
   model_fit <- brm(bf(canopy_height ~ c / (1 + exp(b * gdd)),
             b + c ~ 1, nl = TRUE),
-         data = s6_cultivar_list[[i]], prior = gen_sorg_priors,
+         data = li[[i]], prior = gen_sorg_priors,
          control = list(adapt_delta = 0.99),
-         cores = 4, thin = 5, iter = 20000, seed = 42)
+         cores = 4, thin = 5, iter = 20000, seed = 42,
+         save_model = stanout)
   model_fit_sum <- summary(model_fit) #get model fit summary
   hmc_out[i,2] <- model_fit_sum$fixed[1,1] #extract estimated growth rate
   hmc_out[i,3] <- model_fit_sum$fixed[2,1] #extract estimated height
-  hmc_out[i,4] <- max(s6_cultivar_list[[i]]$canopy_height) #measured max height
-  hmc_out[i,5] <- sd(hmc_out[i,3], hmc_out[i,4]) #sd of heights
-  hmc_out[i,6] <- hmc_out[i,3]/2 #estimated inflection point 
+  hmc_out[i,4] <- max(li[[i]]$canopy_height) #measured max height
+  }
 }
+find_growth_params(s6_cultivar_list, "s6_")
