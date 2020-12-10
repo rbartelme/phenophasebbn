@@ -1,7 +1,12 @@
 library(tidyverse)
-library(tidybayes)
+#library(tidybayes)
 library(rstan)
 library(brms)
+library(shinystan)
+# To avoid recompilation of unchanged Stan programs, we recommend calling
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+
 #set seed for R's random sample
 set.seed(5)
 # read in season 6 wide format dataframe
@@ -17,9 +22,9 @@ s6_subset <- season6 %>%  filter(cultivar %in% s6_cultivars) %>%
   select(sitename, gdd, canopy_height, cultivar, date) %>% 
   arrange(date)
 
-ggplot(data = s6_subset, aes(gdd, canopy_height, color = cultivar, group = sitename)) +
-  geom_point() + 
-  geom_smooth()
+# ggplot(data = s6_subset, aes(gdd, canopy_height, color = cultivar, group = sitename)) +
+#   geom_point() + 
+#   geom_smooth()
 
 
 # s6_subset <- s6_subset[order(as.Date(s6_subset$date), s6_subset$sitename),]
@@ -67,14 +72,17 @@ fit3 <- brm(bf(canopy_height ~ a + c / (1 + exp(b * gdd)),
                b + c ~ (1|gr(sitename, cor = FALSE)),
                a ~ 1,
                nl = TRUE,
-               center = TRUE),
+               center = FALSE),
             data = s6_subset, prior = sorg_priors2,
-            control = list(adapt_delta = 0.99), 
-            chains = 4,
-            cores = 4, 
-            thin = 5, 
-            iter = 20000, seed = 42)
+            control = list(adapt_delta = 0.95, 
+                           stepsize = 0.1,
+                           max_treedepth = 15), 
+            chains = 10,
+            cores = 10,
+            iter = 2000, seed = 55)
 
+saveRDS(fit3, file = "~/phenophasebbn/fit3.rds")
+my_sso <- launch_shinystan(fit3)
 
 # 
 # fit2 <- brm(bf(canopy_height ~ c / (1 + exp(b * gdd)),
