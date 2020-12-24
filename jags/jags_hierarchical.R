@@ -66,8 +66,8 @@ model{
   Pc <- 1/stdc*stdc
   
   # root node prior - global precision
-  tau ~ dgamma(0.01, 0.01)
-  sig <- pow(tau, -2)
+  tau ~ dgamma(0.1, 0.1)
+  sig <- pow(tau, -0.5)
   
   # sigs to monitor
   sigs[1] <- sig
