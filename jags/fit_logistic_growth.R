@@ -53,9 +53,9 @@ fit_logistic_growth <- function(data, type = "simple", outdir) {
                              theta.b = rnorm(1, 0, 10),
                              tau = runif(1, 0, 1))}
   } else {
-    inits <- function(){list(mu.theta.c = rnorm(1, 0, 10), 
-                            mu.theta.a = rnorm(1, 0, 10),
-                            mu.theta.b = rnorm(1, 0, 10),
+    inits <- function(){list(mu.theta.c = rnorm(1, 5, 1), 
+                            mu.theta.a = rnorm(1, -5, 1),
+                            mu.theta.b = rnorm(1, 5, 1),
                             tau.c.eps = runif(1, 0, 1),
                             tau.a.eps = runif(1, 0, 1),
                             tau.b.eps = runif(1, 0, 1),
