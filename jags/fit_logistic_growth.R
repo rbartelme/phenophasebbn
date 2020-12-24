@@ -4,7 +4,7 @@
 fit_logistic_growth <- function(data, type = "simple", outdir) {
   
   library(rjags)
-  load.module('dic')
+  # load.module('dic')
   library(coda)
   library(postjags)
   library(mcmcplots)
@@ -80,7 +80,7 @@ fit_logistic_growth <- function(data, type = "simple", outdir) {
   
   # Update and monitor samples for effective number of parameters
   update(jm, n.iter = 5000)
-  dic <- dic.samples(jm, n.iter = 5000)
+  # dic <- dic.samples(jm, n.iter = 5000)
   
   # Set parameters to monitor
   if (type == "simple") {
@@ -105,10 +105,12 @@ fit_logistic_growth <- function(data, type = "simple", outdir) {
                           n.iter = 10000,
                           thin = 10)
   
-  # Update and re-run if not converged
+  # First convergence check: update and re-run if not converged
   gel <- gelman.diag(jm_coda, multivariate = F)
+  n.update <- 0 
   if (max(gel$psrf[,1]) > 1.3) {
     warning("model did not converge; restarting with saved state")
+    n.update <- 1
     saved.state <- initfind(jm_coda)
     if (type == "simple") {
       new_inits <- removevars(saved.state, variables = c(1:6))[[2]]
@@ -124,7 +126,46 @@ fit_logistic_growth <- function(data, type = "simple", outdir) {
                        n.chains = 3)
     }
     update(jm, n.iter = 5000)
-    dic <- dic.samples(jm, n.iter = 5000)
+    # dic <- dic.samples(jm, n.iter = 5000)
+    jm_coda <- coda.samples(model = jm,
+                            variable.names = params,
+                            n.iter = 10000,
+                            thin = 10)
+  }
+  
+  # Second convergence check: update with lowest saved state and re-run if not converged
+  gel <- gelman.diag(jm_coda, multivariate = F)
+  if (max(gel$psrf[,1]) > 1.3) {
+    warning("model did not converge; restarting with lowest saved state")
+    n.update <- 2
+    saved.state <- initfind(jm_coda)
+    # Find chain with lowest Dsum
+    i <- which(names(saved.state$initials[[1]]) == "Dsum")
+    Dsums <- c(saved.state$initials[[1]][i],
+               saved.state$initials[[2]][i],
+               saved.state$initials[[3]][i])
+    ind <- which.min(Dsums)
+    if (type == "simple") {
+      new_inits <- removevars(saved.state, variables = c(1:6))[[2]]
+      new_inits2 <- list(new_inits[[ind]],
+                         new_inits[[ind]],
+                         new_inits[[ind]])
+      jm <- jags.model(file = "jags_simple.R", 
+                       data = datlist, 
+                       inits = new_inits2,
+                       n.chains = 3)
+    } else {
+      new_inits <- removevars(saved.state, variables = c(1:6, 10:11, 16:17))[[2]]
+      new_inits2 <- list(new_inits[[ind]],
+                         new_inits[[ind]],
+                         new_inits[[ind]])
+      jm <- jags.model(file = "jags_hierarchical.R", 
+                       data = datlist, 
+                       inits = new_inits2,
+                       n.chains = 3)
+    }
+    update(jm, n.iter = 5000)
+    # dic <- dic.samples(jm, n.iter = 5000)
     jm_coda <- coda.samples(model = jm,
                             variable.names = params,
                             n.iter = 10000,
@@ -183,11 +224,12 @@ fit_logistic_growth <- function(data, type = "simple", outdir) {
   # Return a dataframe of cultivar, 
   # Posterior median and 95% CI of Ymax, Ymin, and Ghalf
   # Posterior mean of deviance and Dsum
-  # pD (effective number of parameters) and DIC (deviance + pD)
+  # pD (effective number of parameters) and DIC (deviance + pD) (Leave out for now)
   # Rhat (Gelman diagnostic),
   # R^2, bias, coverage
   out <- data.frame(cultivar = cultivar,
                     type = type, 
+                    n.update = n.update, 
                     Ymax.median = mcmc_sum[grep("Ymax", rownames(mcmc_sum)),2],
                     Ymax.lower = mcmc_sum[grep("Ymax", rownames(mcmc_sum)),4],
                     Ymax.upper = mcmc_sum[grep("Ymax", rownames(mcmc_sum)),5],
@@ -199,8 +241,8 @@ fit_logistic_growth <- function(data, type = "simple", outdir) {
                     Ghalf.upper = mcmc_sum[grep("Ghalf", rownames(mcmc_sum)),5],
                     deviance = mcmc_sum[grep("deviance", rownames(mcmc_sum)),1],
                     Dsum = mcmc_sum[grep("Dsum", rownames(mcmc_sum)),1],
-                    pD = sum(dic$penalty),
-                    DIC = sum(dic$deviance) + sum(dic$penalty),
+                    # pD = sum(dic$penalty),
+                    # DIC = sum(dic$deviance) + sum(dic$penalty),
                     Rhat = max(gel$psrf[,1]),
                     r2 = m$adj.r.squared,
                     bias = m$coefficients[2,1],
