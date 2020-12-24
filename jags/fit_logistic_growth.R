@@ -187,6 +187,7 @@ fit_logistic_growth <- function(data, type = "simple", outdir) {
   # Rhat (Gelman diagnostic),
   # R^2, bias, coverage
   out <- data.frame(cultivar = cultivar,
+                    type = type, 
                     Ymax.median = mcmc_sum[grep("Ymax", rownames(mcmc_sum)),2],
                     Ymax.lower = mcmc_sum[grep("Ymax", rownames(mcmc_sum)),4],
                     Ymax.upper = mcmc_sum[grep("Ymax", rownames(mcmc_sum)),5],
