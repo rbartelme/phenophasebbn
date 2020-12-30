@@ -134,3 +134,19 @@ benchmark(
 save(out10.RE, file = "tests.RE/out10.RE.Rdata")
 save(out10.sim, file = "tests.sim/out10.sim.Rdata")
 ```
+
+
+## Running models with lapply for all cultivars
+```{r}
+# split into list of 217 cultivars and add sites
+s6 <- subset(season6, select = c(sitename, gdd, canopy_height, 
+                                 cultivar, date))[order(season6$date),] 
+all.list <- split(s6, f = s6$cultivar)
+all.list <- lapply(all.list, FUN = add_site)
+
+start <- proc.time()
+out.all <- lapply(all.list, FUN = fit_logistic_growth, 
+                        type = "RE", outdir = "~/phenophasebbn/jags/tests.all")
+end <- proc.time()
+dur <- (end-start)[[3]]/60/60
+```
