@@ -4,7 +4,7 @@
 fit_logistic_growth <- function(data, type = "simple", outdir) {
   
   library(rjags)
-  # load.module('dic')
+  load.module('dic')
   library(coda)
   library(postjags)
   library(mcmcplots)
@@ -131,10 +131,10 @@ fit_logistic_growth <- function(data, type = "simple", outdir) {
                             variable.names = params,
                             n.iter = 10000,
                             thin = 10)
+    gel <- gelman.diag(jm_coda, multivariate = F)
   }
   
   # Second convergence check: update with lowest saved state and re-run if not converged
-  gel <- gelman.diag(jm_coda, multivariate = F)
   if (max(gel$psrf[,1]) > 1.3) {
     warning("model did not converge; restarting with lowest saved state")
     n.update <- 2
@@ -170,12 +170,12 @@ fit_logistic_growth <- function(data, type = "simple", outdir) {
                             variable.names = params,
                             n.iter = 10000,
                             thin = 10)
+    gel <- gelman.diag(jm_coda, multivariate = F)
   }
   
   # Outputs and model diagnostics
   
   # Gelman diagnostic (Rhat)
-  gel <- gelman.diag(jm_coda, multivariate = F)
   save(gel, file = file.path(outdir, cultivar,  paste0("gelman_", cultivar, ".Rdata")))
   
   # Coda and traceplots
