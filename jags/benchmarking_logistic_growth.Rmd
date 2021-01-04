@@ -23,7 +23,7 @@ The final argument, outdir, defines the path where files should be saved. A fold
 
 ```{r}
 library(dplyr)
-# devtools::install_github("fellmk/PostJAGS/postjags"")
+# devtools::install_github("fellmk/PostJAGS/postjags")
 source("fit_logistic_growth.R")
 # devtools::install_github("eddelbuettel/rbenchmark")
 library(rbenchmark)
@@ -47,7 +47,7 @@ Randomly select a single cultivar and test both the "simple" and the "RE" models
 s6_cultivars <- sample(unique(season6$cultivar), size = 1)
 
 #subset season6 dataframe by 10 randomly selected cultivars
-s6_subset <- season6 %>%  filter(cultivar %in% s6_cultivars) %>% 
+s6_subset <- season6 %>%  filter(cultivar %in% "PI329517") %>% 
   select(sitename, gdd, canopy_height, cultivar, date) %>% 
   arrange(date) %>%
   mutate(site = as.numeric(as.factor(sitename)))
@@ -133,20 +133,4 @@ benchmark(
 
 save(out10.RE, file = "tests.RE/out10.RE.Rdata")
 save(out10.sim, file = "tests.sim/out10.sim.Rdata")
-```
-
-
-## Running models with lapply for all cultivars
-```{r}
-# split into list of 217 cultivars and add sites
-s6 <- subset(season6, select = c(sitename, gdd, canopy_height, 
-                                 cultivar, date))[order(season6$date),] 
-all.list <- split(s6, f = s6$cultivar)
-all.list <- lapply(all.list, FUN = add_site)
-
-start <- proc.time()
-out.all <- lapply(all.list, FUN = fit_logistic_growth, 
-                        type = "RE", outdir = "~/phenophasebbn/jags/tests.all")
-end <- proc.time()
-dur <- (end-start)[[3]]/60/60
 ```
