@@ -98,6 +98,10 @@ fit_logistic_growth <- function(data, type = "simple", outdir) {
                 "ymax", "ymin", "ghalf",
                 "height.rep")
   }
+  # Parameters to check for convergence
+  conv.params <- c("deviance", "Dsum", 
+                   "tau", "sig",
+                   "Ymax", "Ymin", "Ghalf")
 
   # Monitor coda samples
   jm_coda <- coda.samples(model = jm,
@@ -105,10 +109,11 @@ fit_logistic_growth <- function(data, type = "simple", outdir) {
                           n.iter = 10000,
                           thin = 10)
   
-  # First convergence check: update and re-run if not converged
+  # First convergence check of key parameters: update and re-run if not converged
   gel <- gelman.diag(jm_coda, multivariate = F)
+  gel2 <- gel$psrf[match(conv.params, row.names(gel$psrf)),1]
   n.update <- 0 
-  if (max(gel$psrf[,1]) > 1.3) {
+  if (max(gel2) > 1.3) {
     warning("model did not converge; restarting with saved state")
     n.update <- 1
     saved.state <- initfind(jm_coda)
@@ -132,10 +137,11 @@ fit_logistic_growth <- function(data, type = "simple", outdir) {
                             n.iter = 10000,
                             thin = 10)
     gel <- gelman.diag(jm_coda, multivariate = F)
+    gel2 <- gel$psrf[match(conv.params, row.names(gel$psrf)),1]
   }
   
   # Second convergence check: update with lowest saved state and re-run if not converged
-  if (max(gel$psrf[,1]) > 1.3) {
+  if (max(gel2) > 1.3) {
     warning("model did not converge; restarting with lowest saved state")
     n.update <- 2
     saved.state <- initfind(jm_coda)
