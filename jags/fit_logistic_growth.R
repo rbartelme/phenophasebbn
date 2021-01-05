@@ -3,12 +3,12 @@
 
 fit_logistic_growth <- function(data, type = "simple", outdir) {
   
-  library(rjags)
+  require(rjags)
   load.module('dic')
-  library(coda)
-  library(postjags)
-  library(mcmcplots)
-  library(ggplot2)
+  require(coda)
+  require(postjags)
+  require(mcmcplots)
+  require(ggplot2)
   
   if (length(unique(data$cultivar)) != 1){
     stop("Only runs with a single cultivar.")
@@ -142,7 +142,7 @@ fit_logistic_growth <- function(data, type = "simple", outdir) {
   
   # Second convergence check: update with lowest saved state and re-run if not converged
   if (max(gel2) > 1.3) {
-    warning("model did not converge; restarting with lowest saved state")
+    warning("model did not converge; restarting with saved state with lowest Dsum")
     n.update <- 2
     saved.state <- initfind(jm_coda)
     # Find chain with lowest Dsum
