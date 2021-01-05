@@ -1,0 +1,97 @@
+---
+title: "Running logistic growth by cultivar"
+author: "Jessica Guo"
+date: "1/4/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Overview
+This script applies a hierarchical Bayesian model for logistic growth to obtain 3 parameters for each cultivar: maximum and minimum height (cm), and maximum growth rate (cm/gdd). 
+
+
+Load libraries
+```{r}
+library(dplyr)
+source("fit_logistic_growth.R")
+library(ggplot2)
+library(forcats)
+```
+
+Read in MAC season 6 cleaned height data. 
+```{r}
+season6 <- na.omit(read.table(file = "~/phenophasebbn/season6_combined.txt", sep = "\t",
+                              header = TRUE,
+                              stringsAsFactors = FALSE))
+```
+
+## Running models with lapply for all cultivars
+```{r}
+# Function to turn site into numeric within cultivar
+add_site <- function(x){
+  x$site <- as.numeric(as.factor(x$sitename))
+  return(x)
+}
+
+# split into list of 217 cultivars and add sites
+s6 <- subset(season6, select = c(sitename, gdd, canopy_height, 
+                                 cultivar, date))[order(season6$date),] 
+all.list <- split(s6, f = s6$cultivar)
+all.list <- lapply(all.list, FUN = add_site)
+
+# foo <- fit_logistic_growth(data = all.list[[1]], type = "RE", outdir = "~/phenophasebbn/jags/tests.all")
+
+start <- proc.time()
+out.all <- lapply(all.list, FUN = fit_logistic_growth, 
+                        type = "RE", outdir = "~/phenophasebbn/jags/tests.all")
+end <- proc.time()
+dur <- (end-start)[[3]]/60/60
+```
+
+### Combine and plot
+```{r}
+# from saved
+cultivars <- list.files("tests.all")
+out.all <- list()
+for (i in 1:length(cultivars)){
+  load(file.path("tests.all", cultivars[i], "out.Rdata"))
+  
+  out.all[[i]] <- out
+}
+
+
+# combine into single dataframe
+out.df <- do.call(rbind, out.all)
+
+out.df %>%
+  mutate(cultivar = fct_reorder(cultivar, Ymax.median)) %>%
+  ggplot(aes(x = cultivar, y = Ymax.median)) + 
+  geom_point() +
+  geom_errorbar(aes(ymin = Ymax.lower, ymax = Ymax.upper), alpha = 0.25) +
+  scale_y_continuous("Ymax (cm)") +
+  theme_bw(base_size = 12) +
+  coord_flip()
+
+out.df %>%
+  mutate(cultivar = fct_reorder(cultivar, Ymin.median)) %>%
+  ggplot(aes(x = cultivar, y = Ymin.median)) + 
+  geom_point() +
+  geom_errorbar(aes(ymin = Ymin.lower, ymax = Ymin.upper), alpha = 0.25) +
+  scale_y_continuous("Ymin (cm)") +
+  theme_bw(base_size = 12) +
+  coord_flip()
+
+out.df %>%
+  mutate(cultivar = fct_reorder(cultivar, Ghalf.median)) %>%
+  ggplot(aes(x = cultivar, y = Ghalf.median)) + 
+  geom_point() +
+  geom_errorbar(aes(ymin = Ghalf.lower, ymax = Ghalf.upper), alpha = 0.25) +
+  scale_y_continuous("Ghalf (cm/gdd)", limits = c(0, 2.5)) +
+  theme_bw(base_size = 12) +
+  coord_flip()
+```

@@ -21,7 +21,7 @@ model{
     a[j] <- exp(theta.a[j]) - 1
     b[j] <- -1 * exp(theta.b[j])
     
-    # reparameterization to meaninful parameters
+    # reparameterization to meaningful parameters
     ymax[j] <- c[j]
     ymin[j] <- c[j] / (1 + a[j])
     ghalf[j] <- -1 * (c[j] * b[j]) / 4
@@ -32,9 +32,9 @@ model{
   }
   
   # root node priors - population means
-  mu.theta.a ~ dnorm (0, 0.001)
-  mu.theta.b ~ dnorm (0, 0.001)
-  mu.theta.c ~ dnorm (0, 0.001)
+  mu.theta.a ~ dnorm(5, 0.1)
+  mu.theta.b ~ dnorm(-5, 0.1)
+  mu.theta.c ~ dnorm(5, 0.1)
   
   # compute population-level values for phi's
   phi.c <- exp(mu.theta.c)
@@ -66,8 +66,8 @@ model{
   Pc <- 1/stdc*stdc
   
   # root node prior - global precision
-  tau ~ dgamma(0.01, 0.01)
-  sig <- pow(tau, -2)
+  tau ~ dgamma(0.1, 0.1)
+  sig <- pow(tau, -0.5)
   
   # sigs to monitor
   sigs[1] <- sig

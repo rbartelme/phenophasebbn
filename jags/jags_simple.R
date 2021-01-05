@@ -16,9 +16,9 @@ model{
   }
   
   # reparameterization to meaninful parameters
-  ymax <- c
-  ymin <- c / (1 + a)
-  ghalf <- -1 * (c * b) / 4
+  Ymax <- c
+  Ymin <- c / (1 + a)
+  Ghalf <- -1 * (c * b) / 4
   
   c <- exp(theta.c)
   a <- exp(theta.a) - 1
@@ -31,7 +31,7 @@ model{
 
   # root node prior - global precision
   tau ~ dgamma(0.1, 0.1)
-  sig <- pow(tau, -2)
+  sig <- pow(tau, -0.5)
   
   # posterior predictive loss is the posterior mean of Dsum
   Dsum <- sum(Sqdiff[])
