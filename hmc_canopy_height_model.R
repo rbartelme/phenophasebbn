@@ -1,5 +1,5 @@
 library(tidyverse)
-#library(tidybayes)
+library(tidybayes)
 library(rstan)
 library(brms)
 library(shinystan)
@@ -22,9 +22,9 @@ s6_subset <- season6 %>%  filter(cultivar %in% s6_cultivars) %>%
   select(sitename, gdd, canopy_height, cultivar, date) %>% 
   arrange(date)
 
-# ggplot(data = s6_subset, aes(gdd, canopy_height, color = cultivar, group = sitename)) +
-#   geom_point() + 
-#   geom_smooth()
+ggplot(data = s6_subset, aes(gdd, canopy_height, color = cultivar, group = sitename)) +
+  geom_point() +
+  geom_line()
 
 
 # s6_subset <- s6_subset[order(as.Date(s6_subset$date), s6_subset$sitename),]
@@ -68,18 +68,18 @@ sorg_priors2 <- prior(normal(10, 2),  lb = 0, class = 'b',  nlpar = "a") +
   prior(gamma(130, 0.35), lb = 300, nlpar = "c")
 
 
-fit3 <- brm(bf(canopy_height ~ a + c / (1 + exp(b * gdd)), 
+fit3 <- brm(bf(canopy_height ~ c / (1 + exp(a + b * gdd)), 
                b + c ~ (1|gr(sitename, cor = FALSE)),
                a ~ 1,
                nl = TRUE,
                center = FALSE),
             data = s6_subset, prior = sorg_priors2,
-            control = list(adapt_delta = 0.95, 
+            control = list(adapt_delta = 0.8, 
                            stepsize = 0.1,
-                           max_treedepth = 15), 
-            chains = 10,
-            cores = 10,
-            iter = 2000, seed = 55)
+                           max_treedepth = 20), 
+            chains = 7,
+            cores = 7,
+            iter = 1000, seed = 55)
 
 saveRDS(fit3, file = "~/phenophasebbn/fit3.rds")
 my_sso <- launch_shinystan(fit3)
