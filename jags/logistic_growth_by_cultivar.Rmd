@@ -48,7 +48,7 @@ all.list <- lapply(all.list, FUN = add_site)
 
 start <- proc.time()
 out.all <- lapply(all.list, FUN = fit_logistic_growth, 
-                        type = "RE", outdir = "~/phenophasebbn/jags/tests.all")
+                        type = "RE", outdir = "~/phenophasebbn/jags/season6")
 end <- proc.time()
 dur <- (end-start)[[3]]/60/60
 ```
@@ -56,10 +56,10 @@ dur <- (end-start)[[3]]/60/60
 ### Combine and plot
 ```{r}
 # from saved
-cultivars <- list.files("tests.all")
+cultivars <- list.files("season6")
 out.all <- list()
 for (i in 1:length(cultivars)){
-  load(file.path("tests.all", cultivars[i], "out.Rdata"))
+  load(file.path("season6", cultivars[i], "out.Rdata"))
   
   out.all[[i]] <- out
 }
