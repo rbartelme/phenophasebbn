@@ -18,6 +18,7 @@ system('wget https://de.cyverse.org/dl/d/A5B5E73A-B528-4704-BD62-F9995AD5EDB4/ta
 
 # read in CSV filepaths as list
 data_path <- list("tall_season_four.csv", "mac_season_six_2020-04-22.csv", "tall_ksu_data.csv", "tall_clemson_data.csv")
+data_path <- list("tall_season_four.csv", "tall_ksu_data.csv")
 
 # use lapply to read in csv files from list
   # note: function wrapper necessary to provide input argument to read.csv
@@ -26,6 +27,8 @@ raw_data <- lapply(data_path, FUN = function(i){
 
 # name each dataframe in the list based on data_path list order
 experiments <- c("mac_season_4", "mac_season_6", "ksu", "clemson")
+experiments <- c("mac_season_4", "ksu")
+
 names(raw_data) <- experiments
 
 #convert to tibble
@@ -138,6 +141,7 @@ system('wget https://de.cyverse.org/dl/d/1EB28C81-10A1-4E1B-A406-1D0C6A20AF2D/cl
 
 weather_raw <- list("mac_season_4_weather.csv", "mac_season_6_weather.csv", "ksu_weather.csv",
                     "clemson_weather.csv")
+weather_raw <- list("mac_season_4_weather.csv", "ksu_weather.csv")
 
 # use map from purrr to read in csv files
 raw_weather_data <- map(.x = weather_raw, .f = function(i){read.csv(i, header = TRUE, stringsAsFactors = FALSE)})
@@ -145,6 +149,7 @@ raw_weather_data <- map(.x = weather_raw, .f = function(i){read.csv(i, header = 
 #assign names to list of dataframes
 names(raw_weather_data) <- c("mac_season_4_weather", "mac_season_6_weather", 
                              "ksu_weather", "clemson_weather")
+names(raw_weather_data) <- c("mac_season_4_weather", "ksu_weather")
 # colname sanity check
 colnames(raw_weather_data$mac_season_4_weather)
 colnames(raw_weather_data$mac_season_6_weather)
@@ -189,6 +194,10 @@ dim(combined_tibbs[[2]])
 
 #write out season6 for growth curves
 write.table(combined_tibbs_unq$mac_season_6, file = "~/phenophasebbn/season6_combined.txt",
+            quote = FALSE, sep = "\t")
+write.table(combined_tibbs_unq$mac_season_4, file = "~/phenophasebbn/season4_combined.txt",
+            quote = FALSE, sep = "\t")
+write.table(combined_tibbs_unq$ksu, file = "~/phenophasebbn/ksu_combined.txt",
             quote = FALSE, sep = "\t")
 
 #combine all location dataframes
