@@ -23,11 +23,17 @@ library(ggplot2)
 library(forcats)
 ```
 
-Read in MAC season 6 cleaned height data. 
+Read in MAC seasons 4 and 6 cleaned height data. 
 ```{r}
+season4 <- na.omit(read.table(file = "~/phenophasebbn/season4_combined.txt", sep = "\t",
+                              header = TRUE,
+                              stringsAsFactors = FALSE))
+
+summary(c(table(season4$cultivar)))
 season6 <- na.omit(read.table(file = "~/phenophasebbn/season6_combined.txt", sep = "\t",
                               header = TRUE,
                               stringsAsFactors = FALSE))
+summary(c(table(season6$cultivar)))
 ```
 
 ## Running models with lapply for all cultivars
@@ -39,15 +45,26 @@ add_site <- function(x){
 }
 
 # split into list of 217 cultivars and add sites
+s4 <- subset(season4, select = c(sitename, gdd, canopy_height, 
+                                 cultivar, date))[order(season4$date),] 
+s4.list <- split(s4, f = s4$cultivar)
+s4.list <- lapply(s4.list, FUN = add_site)
+
 s6 <- subset(season6, select = c(sitename, gdd, canopy_height, 
                                  cultivar, date))[order(season6$date),] 
-all.list <- split(s6, f = s6$cultivar)
-all.list <- lapply(all.list, FUN = add_site)
+s6.list <- split(s6, f = s6$cultivar)
+s6.list <- lapply(s6.list, FUN = add_site)
 
-# foo <- fit_logistic_growth(data = all.list[[1]], type = "RE", outdir = "~/phenophasebbn/jags/tests.all")
-
+# run for season 4
 start <- proc.time()
-out.all <- lapply(all.list, FUN = fit_logistic_growth, 
+out.s4 <- lapply(s4.list, FUN = fit_logistic_growth, 
+                        type = "RE", outdir = "~/phenophasebbn/jags/season4")
+end <- proc.time()
+dur <- (end-start)[[3]]/60/60
+
+# run for season 6
+start <- proc.time()
+out.s6 <- lapply(s6.list, FUN = fit_logistic_growth, 
                         type = "RE", outdir = "~/phenophasebbn/jags/season6")
 end <- proc.time()
 dur <- (end-start)[[3]]/60/60
@@ -55,43 +72,93 @@ dur <- (end-start)[[3]]/60/60
 
 ### Combine and plot
 ```{r}
-# from saved
+# from saved model outputs
+cultivars <- list.files("season4")
+out.s4 <- list()
+for (i in 1:length(cultivars)){
+  load(file.path("season4", cultivars[i], "out.Rdata"))
+  out <- out %>%
+    mutate(season = "season_4")
+  out.s4[[i]] <- out
+}
 cultivars <- list.files("season6")
-out.all <- list()
+out.s6 <- list()
 for (i in 1:length(cultivars)){
   load(file.path("season6", cultivars[i], "out.Rdata"))
-  
-  out.all[[i]] <- out
+  out <- out %>%
+    mutate(season = "season_6")
+  out.s6[[i]] <- out
 }
 
-
 # combine into single dataframe
-out.df <- do.call(rbind, out.all)
+s4.df <- do.call(rbind, out.s4)
+s6.df <- do.call(rbind, out.s6)
 
-out.df %>%
+all.df <- rbind(s4.df, s6.df)
+
+#output
+out.csv <- all.df %>%
+  select(season, cultivar, type,
+         Ymax.median, # Ymax.lower, Ymax.upper,
+         Ymin.median, # Ymin.lower, Ymin.upper,
+         Ghalf.median, # Ghalf.lower, Ghalf.upper,
+         r2) %>%
+  rename(genotype = cultivar, method_type = type,
+         max_height_cm = Ymax.median,
+         min_height_cm = Ymin.median,
+         max_growth_cm_gdd = Ghalf.median) %>%
+  mutate(method = "Bayesian logistic model of canopy height vs. gdd") %>%
+  relocate(method_type, .after = last_col())
+
+write.csv(out.csv, file = "mac_growth_rate_modeled.csv", row.names = F)
+
+all.df %>%
   mutate(cultivar = fct_reorder(cultivar, Ymax.median)) %>%
   ggplot(aes(x = cultivar, y = Ymax.median)) + 
-  geom_point() +
-  geom_errorbar(aes(ymin = Ymax.lower, ymax = Ymax.upper), alpha = 0.25) +
+  geom_point(aes(color = season)) +
+  # geom_errorbar(aes(ymin = Ymax.lower, ymax = Ymax.upper), alpha = 0.25) +
   scale_y_continuous("Ymax (cm)") +
   theme_bw(base_size = 12) +
   coord_flip()
 
-out.df %>%
+all.df %>%
   mutate(cultivar = fct_reorder(cultivar, Ymin.median)) %>%
   ggplot(aes(x = cultivar, y = Ymin.median)) + 
-  geom_point() +
-  geom_errorbar(aes(ymin = Ymin.lower, ymax = Ymin.upper), alpha = 0.25) +
+  geom_point(aes(color = season)) +
+  # geom_errorbar(aes(ymin = Ymin.lower, ymax = Ymin.upper), alpha = 0.25) +
   scale_y_continuous("Ymin (cm)") +
   theme_bw(base_size = 12) +
   coord_flip()
 
-out.df %>%
+all.df %>%
   mutate(cultivar = fct_reorder(cultivar, Ghalf.median)) %>%
   ggplot(aes(x = cultivar, y = Ghalf.median)) + 
-  geom_point() +
-  geom_errorbar(aes(ymin = Ghalf.lower, ymax = Ghalf.upper), alpha = 0.25) +
-  scale_y_continuous("Ghalf (cm/gdd)", limits = c(0, 2.5)) +
+  geom_point(aes(color = season)) +
+  # geom_errorbar(aes(ymin = Ghalf.lower, ymax = Ghalf.upper), alpha = 0.25) +
+  scale_y_continuous("Ghalf (cm/gdd)") +
   theme_bw(base_size = 12) +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
   coord_flip()
 ```
+
+KSU data is much sparser than MAC. Will the model work? Plot and test. 
+```{r}
+ksu <- na.omit(read.table(file = "~/phenophasebbn/ksu_combined.txt", sep = "\t",
+                              header = TRUE,
+                              stringsAsFactors = FALSE))
+summary(c(table(ksu$cultivar)))
+
+set.seed(8675309)
+cultivar <- sample(unique(ksu$cultivar), size = 1)
+#subset season6 dataframe by 10 randomly selected cultivars
+ksu_subset <- ksu %>%  filter(cultivar %in% "PI570373") %>% 
+  select(sitename, gdd, canopy_height, cultivar, date) %>% 
+  arrange(date) %>%
+  mutate(site = as.numeric(as.factor(sitename)))
+
+ggplot(data = ksu_subset, aes(gdd, canopy_height, color = cultivar, group = sitename)) +
+  geom_point() +
+  geom_smooth()
+```
+
