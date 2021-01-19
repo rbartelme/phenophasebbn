@@ -78,6 +78,9 @@ fit_logistic_growth <- function(data, type = "simple", outdir) {
     
   }
   
+  # Print cultivar ID for initialized model
+  print(paste0("Cultivar ", cultivar, "model initialized"))
+  
   # Update and monitor samples for effective number of parameters
   update(jm, n.iter = 5000)
   # dic <- dic.samples(jm, n.iter = 5000)
