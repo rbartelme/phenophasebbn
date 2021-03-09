@@ -5,3 +5,8 @@
 season_6_2020-06-25T204820.csv
 s4_august.dsc
 *.bif
+
+#ignore files in the season4 and season6 folders - can be generated 
+jags/season4/
+jags/season6/
+data_figs/
