@@ -25,12 +25,12 @@ library(forcats)
 
 Read in MAC seasons 4 and 6 cleaned height data. 
 ```{r}
-season4 <- na.omit(read.table(file = "~/phenophasebbn/season4_combined.txt", sep = "\t",
+season4 <- na.omit(read.table(file = "../season4_combined.txt", sep = "\t",
                               header = TRUE,
                               stringsAsFactors = FALSE))
 
 summary(c(table(season4$cultivar)))
-season6 <- na.omit(read.table(file = "~/phenophasebbn/season6_combined.txt", sep = "\t",
+season6 <- na.omit(read.table(file = "../season6_combined.txt", sep = "\t",
                               header = TRUE,
                               stringsAsFactors = FALSE))
 summary(c(table(season6$cultivar)))
@@ -44,7 +44,7 @@ add_site <- function(x){
   return(x)
 }
 
-# split into list of 217 cultivars and add sites
+# split into list of 262 or 274 cultivars and add sites
 s4 <- subset(season4, select = c(sitename, gdd, canopy_height, 
                                  cultivar, date))[order(season4$date),] 
 s4.list <- split(s4, f = s4$cultivar)
@@ -58,14 +58,14 @@ s6.list <- lapply(s6.list, FUN = add_site)
 # run for season 4
 start <- proc.time()
 out.s4 <- lapply(s4.list, FUN = fit_logistic_growth, 
-                        type = "RE", outdir = "~/phenophasebbn/jags/season4")
+                        type = "RE", outdir = "~/volume/phenophasebbn/jags/season4")
 end <- proc.time()
 dur <- (end-start)[[3]]/60/60
 
 # run for season 6
 start <- proc.time()
 out.s6 <- lapply(s6.list, FUN = fit_logistic_growth, 
-                        type = "RE", outdir = "~/phenophasebbn/jags/season6")
+                        type = "RE", outdir = "~/volume/phenophasebbn/jags/season6")
 end <- proc.time()
 dur <- (end-start)[[3]]/60/60
 ```
@@ -94,7 +94,8 @@ for (i in 1:length(cultivars)){
 s4.df <- do.call(rbind, out.s4)
 s6.df <- do.call(rbind, out.s6)
 
-all.df <- rbind(s4.df, s6.df)
+all.df <- rbind(s4.df, s6.df) %>%
+  arrange(r2)
 
 #output
 out.csv <- all.df %>%
