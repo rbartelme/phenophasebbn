@@ -1,19 +1,40 @@
-# phenophasebbn
-Phenophase Bayesian Belief Network in R
+# *Sorghum bicolor bicolor* Phenophase Bayesian Belief Network in R
 
 This project uses:
 
-  - [Rocker Group](https://github.com/rocker-org)'s Tidyverse Docker Container Version 3.6.2 as the base image
+  - [Rocker Group](https://github.com/rocker-org)'s Tidyverse R 4.0 Ubuntu 18 LTS docker container image
   - the [bnlearn](https://www.bnlearn.com/) R library
-  - data from the [TERRA-REF project](https://www.terraref.org/)
+  - data from the [TERRA-REF project](https://www.terraref.org/) accessed through the [traits](https://docs.ropensci.org/traits/) R package
+  - [jags](https://mcmc-jags.sourceforge.io/) for Gibbs Sampled MCMC modeling
 
- To develop a probabilistic network predicting phenotype transitions in *Sorghum bicolor*
+To develop a probabilistic network predicting phenotype transitions in *Sorghum bicolor*
+
+This analysis produces a casual inference Bayesian Belief Network similar to Judea Pearle's [work](https://escholarship.org/content/qt53n4f34m/qt53n4f34m.pdf), where the nodes (vertices) of the network represent variables and the edges (arcs) represent linked dependencies supported by [conditional probailities](https://en.wikipedia.org/wiki/Conditional_probability#:~:text=In%20probability%20theory%2C%20conditional%20probability,or%20evidence)%20has%20already%20occurred.)
+
 
 ---
 
-### Container Setup
+### Docker Container Setup
+
+For reproducibility and scalability, we have containerized the dependencies into an Ubuntu 18 LTS RStudio Server docker environment, which allows users to run this code without installing or troubleshooting dependencies.
 
 ---
+
+#### Docker Container Availability
+
+The Docker container for these R analyses is hosted on the [CyVerse VICE DockerHub page](https://hub.docker.com/repository/docker/cyversevice/rstudio-bayes-cpu). This is hosted in [CyVerse VICE](https://de2.cyverse.org/). 
+
+
+To run the latest version of this docker container image locally you can do the following:
+
+1. Install [docker](https://www.docker.com/) locally. 
+2. Execute the following docker command: `docker pull cyversevice/rstudio-bayes-cpu:latest`
+3. Wait for docker to pull the container from docker hub
+4. Execute the following command to run the container `docker run -d -it -rm -p 8787:80 -e REDIRECT_URL=http://localhost:8787 cyversevice/rstudio-bayes-cpu:latest`
+5. Open a web browser and go to the url `http://localhost:8787`, RStudio Server should be available in this browser window.
+
+*Note: if docker is running remotelyyou can replace localhost with the address of the remote machine*
+
 
 #### Log on to CyVerse Discovery environment
 
