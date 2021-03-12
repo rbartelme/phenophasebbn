@@ -83,7 +83,7 @@ BIC(sorg_fit, sorg_tab)
 # Original Result: -88021526
 # June 2020, New GDD Result: -97605837
 #================================================================
-# September 2020, New features BIC Result: 
+# September 2020, New features BIC Result:
 
 
 #================================================================
