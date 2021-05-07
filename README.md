@@ -3,9 +3,10 @@
 This project uses:
 
   - [Rocker Group](https://github.com/rocker-org)'s Tidyverse R 4.0 Ubuntu 18 LTS docker container image
-  - the [bnlearn](https://www.bnlearn.com/) R library
   - data from the [TERRA-REF project](https://www.terraref.org/) accessed through the [traits](https://docs.ropensci.org/traits/) R package
   - [jags](https://mcmc-jags.sourceforge.io/) for Gibbs Sampled MCMC modeling
+  - [causalnex](https://causalnex.readthedocs.io/en/latest/) to implement the `NO TEARS` directed acyclic graph structure learning algorithm as described [here](https://github.com/xunzheng/notears)
+  - Under the hood, `causalnex` also uses `pandas`, `sklearn`, and `igraph`
 
 To develop a probabilistic network predicting phenotype transitions in *Sorghum bicolor*
 
@@ -113,23 +114,4 @@ To run the latest version of this docker container image locally you can do the 
 
   4. Export `.pdf` file of graph structure from Script
 
----
 
-## Project Notes
-
-### Dynamic Bayesian Belief Network Examples
-
-- [Using bnlearn](https://www.github.com/rbartelme/phenophasebbn)
-- [Introduction to Dynamic Bayesian Networks](https://www.bayesserver.com/docs/introduction/dynamic-bayesian-networks)
-  * suggests starting with a non-temporal network analysis of dataset
-  * BayesServer itself is closed source
-
-### Necessities for *Sorghum bicolor* data
-
-- Encode datetime as simple series of T = [t<sub>0</sub>, t<sub>1</sub>, ..., t<sub>n</sub>]
-- Encode cultivars with simple integers in network code
-- Winnow data to match MSU neural network team's input variables
-
-### Considerations for generalization of network
-
-- Elmendorf *et al.*, 2019: [Time to branch out? Application of hierarchical survival models in plant phenology](https://www.sciencedirect.com/science/article/pii/S0168192319303107?via%3Dihub)
