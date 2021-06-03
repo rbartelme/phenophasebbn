@@ -1,0 +1,99 @@
+---
+title: "Testing functions"
+author: "Jessica Guo"
+date: "6/2/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Testing functions to obtain MAC trait and weather data
+
+High-frequency trait data from the gantry at Maricopa Agriculture Station is curated in the TERRAREF version of BETYdb, and coincident weather data is available through [AZMET](https://cals.arizona.edu/azmet/06.htm). Two functions were created to pull canopy heights and weather data for the NSF PEG project. 
+
+```{r functions}
+source("obtain_height.R")
+source("format_weather.R")
+```
+
+Both functions use the `traits` R package to access the metadata about the experiments, using experiment_id as the only input. Canopy height (cm) is pulled from the static and published data set on [Dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.4b8gtht99), including both manual and sensor measurements when available. Daily weather variables for Maricopa is obtained from [AZMET](https://cals.arizona.edu/azmet/06.htm). 
+
+## Seasons
+
+Currently, we use season 4 and season 6 canopy height and growing degree days (gdd) to derive growth rate and maximum height, which is ingested in the Bayesian Belief Network. Both functions need the BETYdb experiment id. 
+
+```{r season4}
+id = 6000000010 # season 4
+format_weather(id = id)
+obtain_height(id = id)
+```
+
+```{r season6}
+id = 6000000034 # season 6
+format_weather(id = id)
+obtain_height(id = id)
+```
+
+## Compare to previous inputs
+Download the previous data (only once). Compare current with former data sets to assure that dimensions and column names match. 
+
+```{r previous}
+# system('wget https://de.cyverse.org/dl/d/6D959379-0442-41FE-8BEE-890866ACF037/mac_season_4_weather.csv')
+# system('wget https://de.cyverse.org/dl/d/C6219045-8114-4068-B924-8C2CD54AB9FD/mac_season_6_weather.csv')
+# system('wget https://de.cyverse.org/dl/d/B3ADF887-BDE3-435B-9301-4C3FCB4F56F1/tall_season_four.csv')
+# system('wget https://de.cyverse.org/dl/d/FD84112F-FCEA-4089-8486-B1D19D71300B/mac_season_six_2020-04-22.csv')
+```
+
+Compare weather data for both seasons. 
+```{r}
+# Season 4 weather
+new_s4w <- read.csv("Season_4_weather.csv")
+old_s4w <- read.csv("mac_season_4_weather.csv")
+colnames(new_s4w) %in% colnames(old_s4w)
+nrow(new_s4w) - nrow(old_s4w)
+
+# Season 6 weather
+new_s6w <- read.csv("Season_6_weather.csv")
+old_s6w <- read.csv("mac_season_6_weather.csv")
+colnames(new_s6w) %in% colnames(old_s6w)
+nrow(new_s6w) - nrow(old_s6w)
+```
+
+The weather data match up for the two sets of data. The previous version contains two additional columns, `first_water_deficit_treatment` and `second_water_deficit_treatment` that were not used in analyses and can be safely left out here. The planting and last harvest dates also match up.
+
+Compare height data for both seasons. 
+```{r}
+# Season 4 heights
+new_s4h <- read.csv("Season_4_heights.csv")
+old_s4h <- read.csv("tall_season_four.csv") %>%
+  filter(trait == "canopy_height")
+
+dim(new_s4h); dim(old_s4h)
+unique(new_s4h$method_type)
+unique(old_s4h$method_name)
+colnames(new_s4h) %in% colnames(old_s4h)
+nrow(new_s4h) - nrow(old_s4h)
+```
+
+For Season 4, both sensor and manual data were included. However, there are 8307 fewer records from the curated Dryad data compared to the raw data, and some columns have been renamed. 
+
+```{r}
+# Season 6 weather
+new_s6h <- read.csv("Season_6_heights.csv")
+old_s6h <- read.csv("mac_season_six_2020-04-22.csv") %>%
+  filter(trait == "canopy_height")
+
+dim(new_s6h); dim(old_s6h)
+unique(new_s6h$method_type)
+unique(old_s6h$method_name)
+table(old_s6h$method_name)
+colnames(new_s6h) %in% colnames(old_s6h)
+nrow(new_s6h) - nrow(old_s6h)
+nrow(new_s6h) - nrow(old_s6h[old_s6h$method_name == "3D scanner to 98th quantile height",])
+```
+
+For Season 6, only sensor were available. However, the raw data contains both "3D scanner to 98th quantile height" and "Scanner 3d ply data to height". However, there are 5244 fewer records from the curated Dryad data compared to the raw data (all) and 1497 fewer records compard to raw data ("3D scanner to 98th quantile height" only). Column names again differ. 
