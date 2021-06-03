@@ -10,3 +10,6 @@ s4_august.dsc
 jags/season4/
 jags/season6/
 data_figs/
+
+#ingore csv in data_cleaning - can be generated
+data_processing/*.csv
