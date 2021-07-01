@@ -1,4 +1,4 @@
-# *Sorghum bicolor bicolor* Phenophase Bayesian Belief Network in R
+# *Sorghum bicolor bicolor* Phenophase Bayesian Belief Network in R & Python
 
 This project uses:
 
@@ -8,7 +8,7 @@ This project uses:
   - [causalnex](https://causalnex.readthedocs.io/en/latest/) to implement the `NO TEARS` directed acyclic graph structure learning algorithm as described [here](https://github.com/xunzheng/notears)
   - Under the hood, `causalnex` also uses `pandas`, `sklearn`, and `igraph`
 
-To develop a probabilistic network predicting phenotype transitions in *Sorghum bicolor*
+To develop a causal Bayesian network, also known as a Bayesian Belief Network,  predicting growth rate as a phenotype from the  *Sorghum bicolor* biomass accumulation panel.
 
 This analysis produces a casual inference Bayesian Belief Network similar to Judea Pearle's [work](https://escholarship.org/content/qt53n4f34m/qt53n4f34m.pdf), where the nodes (vertices) of the network represent variables and the edges (arcs) represent linked dependencies supported by [conditional probailities](https://en.wikipedia.org/wiki/Conditional_probability#:~:text=In%20probability%20theory%2C%20conditional%20probability,or%20evidence)%20has%20already%20occurred.)
 
@@ -17,7 +17,9 @@ This analysis produces a casual inference Bayesian Belief Network similar to Jud
 
 ### Docker Container Setup
 
-For reproducibility and scalability, we have containerized the dependencies into an Ubuntu 18 LTS RStudio Server docker environment, which allows users to run this code without installing or troubleshooting dependencies.
+For reproducibility and scalability, we have containerized the dependencies into an Ubuntu 18 LTS RStudio Server docker environment, which allows users to run the R code without installing or troubleshooting dependencies.
+
+Additionally, a command-line container for CausalNex was created to streamline graph structure learning while also maintaining the same standard of reproduction as the R code.
 
 ---
 
@@ -104,14 +106,6 @@ To run the latest version of this docker container image locally you can do the 
 5. Refer to the iRODS documentation on how the analysis outputs may be moved around in the CyVerse Data Store 
 
 ---
-#### Running Bayesian Network Analysis
-
-  1. Load `bnlearn_run.R`
-
-  2. Follow instructions in script to run network (this may take a few hours)
-
-  3. Feel free to close the CyVerse Discovery Environment window until the network analysis finishes
-
-  4. Export `.pdf` file of graph structure from Script
+#### Running Bayesian Belief Network Analysis
 
 
