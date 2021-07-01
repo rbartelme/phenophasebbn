@@ -106,6 +106,13 @@ To run the latest version of this docker container image locally you can do the 
 5. Refer to the iRODS documentation on how the analysis outputs may be moved around in the CyVerse Data Store 
 
 ---
-#### Running Bayesian Belief Network Analysis
+### Running Bayesian Belief Network Analysis
 
+#### JupyterLab Docker Image
+
+To access the latest version of the Bayesian Belief Network JupyterLab container with `torch` + `causalnex` run `docker pull rbartelme/jupyterlab-pytorch-causalnex:latest`
+
+#### Command Line Causal Nex Docker Image
+
+Run `docker pull rbartelme pytorch-causalnex:0.0.2`
 
