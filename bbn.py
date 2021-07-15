@@ -20,25 +20,17 @@ from causalnex.structure import StructureModel
 sm = StructureModel()
 
 # read in descritized data
-data = pd.read_csv('/data/set/path', delimiter='\t')
-
-#drop features
-drop_col = ['code', 'comparison_type', 'comparison_pop']
-data = data.drop(columns=drop_col)
+data = pd.read_csv('/work/rgr_snp_joined.csv')
 
 #dummy encode categoricals and create binary vars for sm
 from sklearn.preprocessing import LabelEncoder
 struct_data = data.copy()
 
-# remove na rows
-struct_data = struct_data.dropna()
-# change sample to genotype to not interfere with code by invoking sample()
-struct_data = struct_data.rename(columns={"sample": "genotype"})
 
 #encode non-binary categorical variables as dummy vars
-dum_df = pd.get_dummies(struct_data, columns=['genotype', 'origin_pop',
-                                                  'treatment_pop',
-                                                  'comparison_3levels'])
+#dum_df = pd.get_dummies(struct_data, columns=['genotype', 'origin_pop',
+ #                                                 'treatment_pop',
+  #                                                'comparison_3levels'])
 # encode binary categorical variables as 0's or 1's
 non_numeric_columns = list(dum_df.select_dtypes(exclude=[np.number]).columns)
 le = LabelEncoder()
