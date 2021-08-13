@@ -6,11 +6,6 @@ import numpy as np
 
 # NOTE: codebase adapted from another project, still a WIP
 # NEEDS: functional python programming
-
-# setup label encoder to transform non-numeric data into numeric data
-from sklearn.preprocessing import LabelEncoder
-le = LabelEncoder()
-
 # silence warnings
 import warnings
 warnings.filterwarnings("ignore")
@@ -20,17 +15,13 @@ from causalnex.structure import StructureModel
 sm = StructureModel()
 
 # read in descritized data
-data = pd.read_csv('/work/rgr_snp_joined.csv')
+data = pd.read_csv('/work/bbn/rgr_snp_joined.csv')
 
 #dummy encode categoricals and create binary vars for sm
 from sklearn.preprocessing import LabelEncoder
-struct_data = data.copy()
+dum_df = data.copy()
 
 
-#encode non-binary categorical variables as dummy vars
-#dum_df = pd.get_dummies(struct_data, columns=['genotype', 'origin_pop',
- #                                                 'treatment_pop',
-  #                                                'comparison_3levels'])
 # encode binary categorical variables as 0's or 1's
 non_numeric_columns = list(dum_df.select_dtypes(exclude=[np.number]).columns)
 le = LabelEncoder()
