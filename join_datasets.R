@@ -18,6 +18,14 @@ rgr_sub <- rgr %>%
 # join with snp data
 joined_pheno <- left_join(snp_rel_geno, rgr_sub, by = "genotype")
 
+#test for NA's
+join_fails <- which(is.na(joined_pheno), arr.ind = TRUE)
+fail_cols <- unique(join_fails[,2])
+# columns that failed were: 4457 4458
+length(unique(joined_pheno$genotype))
+
+dropped_df <- na.omit(joined_pheno))
+length(unique(dropped_df$genotype))
 # export combined data for use with causalnex python library
 write_csv(joined_pheno, file = "~/phenophasebbn/rgr_snp_joined.csv",
                     col_names = TRUE)
