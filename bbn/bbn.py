@@ -15,7 +15,7 @@ from causalnex.structure import StructureModel
 sm = StructureModel()
 
 # read in descritized data
-data = pd.read_csv('/work/bbn/rgr_snp_joined.csv')
+data = pd.read_csv('~/work/phenophasebbn/bbn/rgr_snp_joined.csv')
 
 #dummy encode categoricals and create binary vars for sm
 from sklearn.preprocessing import LabelEncoder
@@ -34,7 +34,7 @@ sm = from_pandas(X=dum_df, max_iter=1000, w_threshold=0.95)
 #pickle the structure model
 import pickle
 # make pickle file binary
-smp = open("nt_sm_a_halleri", "wb")
+smp = open("~/work/phenophasebbn/bbn/nt_sm", "wb")
 # dump the pickle; syntax = (model, filename)
 pickle.dump(sm, smp)
 # close the pickle
