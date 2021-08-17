@@ -3,6 +3,8 @@
 # import pandas and numpy
 import pandas as pd
 import numpy as np
+import json
+
 
 # NOTE: codebase adapted from another project, still a WIP
 # NEEDS: functional python programming
@@ -64,5 +66,5 @@ smp.close()
 # no need to apply thresholding, since this is taken care of in the sm with w_threshold
 from causalnex.plots import plot_structure
 viz = plot_structure(sm)
-viz.draw("sm_plot.png")
+viz.draw("~/work/phenophasebbn/bbn/sm_plot.png")
 
