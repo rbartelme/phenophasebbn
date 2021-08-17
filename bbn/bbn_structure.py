@@ -3,6 +3,8 @@
 # import pandas and numpy
 import pandas as pd
 import numpy as np
+import json
+
 
 # NOTE: codebase adapted from another project, still a WIP
 # NEEDS: functional python programming
@@ -15,7 +17,7 @@ from causalnex.structure import StructureModel
 sm = StructureModel()
 
 # read in descritized data
-data = pd.read_csv('~/work/phenophasebbn/bbn/rgr_snp_joined.csv')
+data = pd.read_csv('/work/phenophasebbn/bbn/rgr_snp_joined.csv')
 
 #dummy encode categoricals and create binary vars for sm
 from sklearn.preprocessing import LabelEncoder
@@ -43,9 +45,9 @@ genotype_map = dict(zip(genotype_uniq.genotype, genotype_uniq.encoding))
 # hardcoded seasons as dict
 season_map = dict({'season_4': 0, 'season_6': 1})
 
-with open("~/work/phenophasebbn/bbn/genotype_map.json", "w") as outfile:
+with open("/work/phenophasebbn/bbn/genotype_map.json", "w") as outfile:
     json.dump(genotype_map, outfile)
-with open("~/work/phenophasebbn/bbn/season_map.json", "w") as outfile:
+with open("/work/phenophasebbn/bbn/season_map.json", "w") as outfile:
     json.dump(season_map, outfile)
 
 # learn structure with NOTEARS, over 1000 iterations,and keep edge weights > 0.95
@@ -54,7 +56,7 @@ sm = from_pandas(X=dum_df, max_iter=1000, w_threshold=0.95)
 #pickle the structure model
 import pickle
 # make pickle file binary
-smp = open("~/work/phenophasebbn/bbn/nt_sm", "wb")
+smp = open("/work/phenophasebbn/bbn/nt_sm", "wb")
 # dump the pickle; syntax = (model, filename)
 pickle.dump(sm, smp)
 # close the pickle
@@ -64,5 +66,5 @@ smp.close()
 # no need to apply thresholding, since this is taken care of in the sm with w_threshold
 from causalnex.plots import plot_structure
 viz = plot_structure(sm)
-viz.draw("sm_plot.png")
+viz.draw("/work/phenophasebbn/bbn/sm_plot.png")
 
