@@ -15,6 +15,10 @@ This analysis produces a casual inference Bayesian Belief Network similar to Jud
 
 ---
 
+
+## Methods
+
+
 ### Docker Container Setup
 
 For reproducibility and scalability, we have containerized the dependencies into an Ubuntu 18 LTS RStudio Server docker environment, which allows users to run the R code without installing or troubleshooting dependencies.
@@ -28,3 +32,38 @@ Additionally, a command-line container for CausalNex was created to streamline g
 The Docker container for these R analyses is hosted on the [CyVerse VICE DockerHub page](https://hub.docker.com/repository/docker/cyversevice/rstudio-bayes-cpu). This is hosted in [CyVerse VICE](https://de2.cyverse.org/). 
 
 The JupyterLab container to examine the python codebase is also integrated into CyVerse VICE.
+
+
+---
+
+### Network Workflow
+
+This details the syntax of data processing. 
+
+**1. Processing raw data:**
+  - Weather data
+  - Phenotype data
+  - Genomic Data
+
+**2. Model Growth Rate by *Sorghum bicolor* Cultivar using JAGS in R:**
+  - Move readme from jags to here
+ 
+**3. Prepare dataset for structure learning in R & Python:**
+  - Join genomic, environmental, and phenotypic data
+
+**4. BBN Structure Learning in Python with NO TEARS algorithm:**
+  - Ingest joined data
+  - Process categorical data with `labelencoder` from `scikit-learn`
+  - Learn structure with `NO TEARS` using the `from_pandas` function from `causalnex`
+  - Export:
+    - pickle of structure model
+    - `png` of directed acyclic graph
+
+**5. Instantiate Bayesian Network:**
+  - Import structure model pickle
+  - Instantiate Bayesian network with `BayesianNetwork()` function from `causalnex`
+
+**6. Discritized Data Mapping & Conditional Probability Distribution Fitting:**
+  - Map continuous variables into categories
+  - 
+
