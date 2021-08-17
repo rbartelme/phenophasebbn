@@ -28,6 +28,26 @@ le = LabelEncoder()
 for col in non_numeric_columns:
   dum_df[col] = le.fit_transform(dum_df[col])
 
+# create json map files for downstream fitting of categoricals
+# -------------------------------------------------------------
+# only two categorical variables genotype and season
+# -------------------------------------------------------------
+#
+# genotype map file from dataframe columns to dict
+cultivar = [data['genotype'], dum_df['genotype']]
+genotypes = pd.concat(cultivar, axis=1)
+genotype_uniq = genotypes.drop_duplicates()
+genotype_uniq.set_axis(['genotype', 'encoding'], axis=1, inplace=True)
+genotype_map = dict(zip(genotype_uniq.genotype, genotype_uniq.encoding))
+
+# hardcoded seasons as dict
+season_map = dict({'season_4': 0, 'season_6': 1})
+
+with open("~/work/phenophasebbn/bbn/genotype_map.json", "w") as outfile:
+    json.dump(genotype_map, outfile)
+with open("~/work/phenophasebbn/bbn/season_map.json", "w") as outfile:
+    json.dump(season_map, outfile)
+
 # learn structure with NOTEARS, over 1000 iterations,and keep edge weights > 0.95
 from causalnex.structure.notears import from_pandas
 sm = from_pandas(X=dum_df, max_iter=1000, w_threshold=0.95)
