@@ -1,4 +1,9 @@
-FROM pytorch/pytorch:1.7.1-cuda11.0-cudnn8-runtime
+FROM pytorch/pytorch:1.6.0-cuda10.1-cudnn7-runtime
+
+# AS OF 8-25-2021 THIS THROWS AN ERROR FOR PYTHON VERSIONING, BUT WILL RUN ON TORCH >=1.4.0, < 2.0
+
+# this now uses an earlier version of torch
+
 
 # Install causalnex and apt-get statements
 
@@ -10,4 +15,6 @@ RUN apt-get update && apt-get install -y \
 	git \
         vim
 
-RUN pip install git+git://github.com/quantumblacklabs/causalnex.git@13aa7473138c4aecb2cd2cc16afba74141d79593
+#install causalnex from personal fork and tag
+RUN git clone https://github.com/rbartelme/causalnex.git && cd causalnex \
+	&& python setup.py install

@@ -4,7 +4,7 @@
 import pandas as pd
 import numpy as np
 import json
-
+import torch
 
 # NOTE: codebase adapted from another project, still a WIP
 # NEEDS: functional python programming
@@ -15,10 +15,11 @@ warnings.filterwarnings("ignore")
 # import StructureModel 
 from causalnex.structure import StructureModel
 sm = StructureModel()
-
+#print diagnostic function
+print("Reading input data...")
 # read in descritized data
 data = pd.read_csv('/work/phenophasebbn/bbn/rgr_snp_joined.csv')
-
+print("Processing input data...")
 #dummy encode categoricals and create binary vars for sm
 from sklearn.preprocessing import LabelEncoder
 dum_df = data.copy()
@@ -49,10 +50,18 @@ with open("/work/phenophasebbn/bbn/genotype_map.json", "w") as outfile:
     json.dump(genotype_map, outfile)
 with open("/work/phenophasebbn/bbn/season_map.json", "w") as outfile:
     json.dump(season_map, outfile)
-
+print("Finished writing metadata for encoding categoricals...")
 # learn structure with NOTEARS, over 1000 iterations,and keep edge weights > 0.95
+device = torch.cuda.is_available()
+print('GPU is available:', device)
+
+print("Starting NO TEARS DAG structure learning...")
 from causalnex.structure.notears import from_pandas
-sm = from_pandas(X=dum_df, max_iter=1000, w_threshold=0.95)
+
+sm = from_pandas(X=dum_df, max_iter=10, w_threshold=0.95)
+
+
+print("Finished structure learning...begin pickling structure model.")
 #pickle the structure model
 import pickle
 # make pickle file binary
@@ -62,6 +71,7 @@ pickle.dump(sm, smp)
 # close the pickle
 smp.close()
 
+print("Generating image of DAG...")
 #output plot of learned graph
 # no need to apply thresholding, since this is taken care of in the sm with w_threshold
 from causalnex.plots import plot_structure
