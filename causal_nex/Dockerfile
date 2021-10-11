@@ -1,9 +1,4 @@
-FROM pytorch/pytorch:1.6.0-cuda10.1-cudnn7-runtime
-
-# AS OF 8-25-2021 THIS THROWS AN ERROR FOR PYTHON VERSIONING, BUT WILL RUN ON TORCH >=1.4.0, < 2.0
-
-# this now uses an earlier version of torch
-
+FROM pytorch/pytorch:1.9.0-cuda11.1-cudnn8-runtime
 
 # Install causalnex and apt-get statements
 
