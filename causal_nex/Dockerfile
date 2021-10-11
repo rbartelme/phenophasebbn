@@ -15,6 +15,5 @@ RUN apt-get update && apt-get install -y \
 	git \
         vim
 
-#install causalnex from personal fork and tag
-RUN git clone https://github.com/rbartelme/causalnex.git && cd causalnex \
-	&& python setup.py install
+#install causalnex via pip
+RUN pip install causalnex
