@@ -31,7 +31,13 @@ To run any aspect of this analysis it is recommended that you have [Docker](http
 
 ---
 
-***NOTE:*** **Learning the graph structure via the [NO TEARS](https://github.com/xunzheng/notears) implementation in [causalnex](https://causalnex.readthedocs.io/en/latest/) *without* GPU acceleration is a computationally intensive process and may not solve the graph structure with the Sorghum gene data included**
+### Initial Graph Embedding
+
+![Initial Graph](initial_concept.png)
+
+In order to speed up the directed acyclic graph generation for the Bayesian Belief Network, an initial graph was instantiated using lists of tuples that reference the edge/node connections and directions outlined in the conceptual diagram above.
+
+***NOTE:*** **Learning the graph structure without any expert knowledge graph encodings via the [NO TEARS](https://github.com/xunzheng/notears) implementation in [causalnex](https://causalnex.readthedocs.io/en/latest/) *without* GPU acceleration is a computationally intensive process and may not solve the graph structure with the Sorghum gene data included in these analyses.**
 
 ---
 
@@ -69,11 +75,12 @@ How the contents of this repository were used to generate the analysis.
     * `/bbn/bbn_structure.py`
   - Process categorical data with `labelencoder` from `scikit-learn`
   - Encode expert knowledge into graph structure via a list of tuples in the first invocation of `StructureModel()`
+    * `png` exported as `/bbn/init_graph.png`
   - Improve graph structure with `NO TEARS` using the `from_pandas` function from `causalnex` blacklisting spurrious node + edge connections with a second list of tuples
   - Exports:
     * categorical label encodings for `genotype` (or cultivar) `/bbn/genotype_map.json` & `/bbn/season_map.json`
     * pickle of structure model
-    * `png` of directed acyclic graph
+    * `png` of directed acyclic graph exported as `/bbn/final_graph.png`
 
 **5. Discritized Data Mapping & Conditional Probability Distribution Fitting:**
   - Import Bayesian Network by structure model pickle
