@@ -25,8 +25,8 @@ To run any aspect of this analysis it is recommended that you have [Docker](http
 
 - All RScripts detailed below can be run with the container image [cyversevice/rstudio-bayes-cpu:4.0-ubuntu-jags](https://hub.docker.com/layers/cyversevice/rstudio-bayes-cpu/4.0-ubuntu-jags/images/sha256-5a9b4017fd234bf007e556da07c5eee58ad5a4d3c5d429529a731241afe2365c?context=explore), including the [growth rate modeling](https://github.com/genophenoenvo/JAGS-logistic-growth) 
 - All python code will run in the command line with this Docker container [image](https://hub.docker.com/r/rbartelme/pytorch-causalnex) and is written so that this repository is mounted as a volume in the container image as `/work/phenophasebbn/` 
-  * Ex. `docker run --rm -it -v /local/path/to/phenophasebbn/:/work/phenophasebbn/ rbartelme/pytorch-causalnex:0.10.0 python bbn_structure.py` (See note below)
-  * The current Dockerfile for this image is contained in this repository at `/causal_nex/Dockerfiile`
+  * Ex. `docker run --rm -it -v /local/path/to/phenophasebbn/:/work/phenophasebbn/ rbartelme/pytorch-causalnex:0.10.0 python /work/phenophasebbn/bbn/bbn_structure.py` (See note below)
+  * The current Dockerfile for this image is contained in this repository at `/causal_nex/Dockerfile`
 - A JupyterLab Docker container [image](https://hub.docker.com/r/rbartelme/jupyterlab-pytorch-causalnex) has been created to facilitate the exploration of the python codebase 
 
 ---
