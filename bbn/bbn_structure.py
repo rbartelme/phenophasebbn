@@ -67,10 +67,7 @@ sm = StructureModel(incoming_graph_data=wl_tup, origin="expert")
 #output plot of learned graph
 # no need to apply thresholding
 from causalnex.plots import plot_structure
-exp_viz = plot_structure(
-    sm,
-    graph_attributes={"scale": "0.5"}
-)
+exp_viz = plot_structure(sm)
 exp_viz.draw("/work/phenophasebbn/bbn/init_graph.png")
 
 # Prep data for structure learning algorithm
@@ -119,20 +116,20 @@ from causalnex.structure.notears import from_pandas
 learned_sm = from_pandas(X=dum_df, max_iter=10, w_threshold=0.95, tabu_edges=bl_tup, tabu_child_nodes=["season"])
 
 
-#print("Finished structure learning...begin pickling structure model.")
+print("Finished structure learning...begin pickling structure model.")
 ##pickle the structure model
-#import pickle
-## make pickle file binary
-#smp = open("/work/phenophasebbn/bbn/nt_sm", "wb")
+import pickle
+# make pickle file binary
+smp = open("/work/phenophasebbn/bbn/nt_sm", "wb")
 # dump the pickle; syntax = (model, filename)
-#pickle.dump(learned_sm, smp)
+pickle.dump(learned_sm, smp)
 # close the pickle
-#smp.close()
+smp.close()
 
-#print("Generating image of final DAG...")
+print("Generating image of final DAG...")
 #output plot of learned graph
 # no need to apply thresholding, since this is taken care of in the sm with w_threshold
-#from causalnex.plots import plot_structure
-#viz = plot_structure(learned_sm)
-#viz.draw("/work/phenophasebbn/bbn/final_graph.png")
+from causalnex.plots import plot_structure#
+viz = plot_structure(learned_sm)
+viz.draw("/work/phenophasebbn/bbn/final_graph.png")
 
