@@ -66,12 +66,12 @@ sm = StructureModel(incoming_graph_data=wl_tup, origin="expert")
 #print("Generating image of initial DAG...")
 #output plot of learned graph
 # no need to apply thresholding
-#from causalnex.plots import plot_structure
-#exp_viz = plot_structure(
-#    sm,
-#    graph_attributes={"scale": "0.5"}
-#)
-#exp_viz.draw("/work/phenophasebbn/bbn/init_graph.png")
+from causalnex.plots import plot_structure
+exp_viz = plot_structure(
+    sm,
+    graph_attributes={"scale": "0.5"}
+)
+exp_viz.draw("/work/phenophasebbn/bbn/init_graph.png")
 
 # Prep data for structure learning algorithm
 print("Processing input data...")
