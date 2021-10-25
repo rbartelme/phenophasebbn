@@ -56,14 +56,14 @@ bl_tup = list(map(tuple, bl))
 #print(bl_tup)
 #print(type(wl_tup))
 #print(all(isinstance(item, tuple) for item in wl_tup))
-
+print("Instantiating Structure Model from list of edges as tuples...")
 
 # import StructureModel 
 from causalnex.structure import StructureModel
 #instantiate structure model
 sm = StructureModel(incoming_graph_data=wl_tup, origin="expert")
 
-#print("Generating image of initial DAG...")
+print("Generating image of initial DAG...")
 #output plot of learned graph
 # no need to apply thresholding
 from causalnex.plots import plot_structure
