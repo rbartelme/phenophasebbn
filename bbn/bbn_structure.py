@@ -54,8 +54,8 @@ for x in range(len(ng)):
 bl_tup = list(map(tuple, bl))
 #debug
 #print(bl_tup)
-print(type(wl_tup))
-print(all(isinstance(item, tuple) for item in wl_tup))
+#print(type(wl_tup))
+#print(all(isinstance(item, tuple) for item in wl_tup))
 
 
 # import StructureModel 
@@ -66,12 +66,12 @@ sm = StructureModel(incoming_graph_data=wl_tup, origin="expert")
 #print("Generating image of initial DAG...")
 #output plot of learned graph
 # no need to apply thresholding
-from causalnex.plots import plot_structure
-exp_viz = plot_structure(
-    sm,
-    graph_attributes={"scale": "0.5"}
-)
-exp_viz.draw("/work/phenophasebbn/bbn/init_graph.png")
+#from causalnex.plots import plot_structure
+#exp_viz = plot_structure(
+#    sm,
+#    graph_attributes={"scale": "0.5"}
+#)
+#exp_viz.draw("/work/phenophasebbn/bbn/init_graph.png")
 
 # Prep data for structure learning algorithm
 print("Processing input data...")
@@ -113,10 +113,10 @@ print("Begin embedding expert knowledge into DAG...")
 #device = torch.cuda.is_available()
 #print('GPU is available:', device)
 
-#print("Appending NO TEARS DAG structure learning to expert encoded DAG...")
-# from causalnex.structure.notears import from_pandas
+print("Appending NO TEARS DAG structure learning to expert encoded DAG...")
+from causalnex.structure.notears import from_pandas
 
-# learned_sm = exp_sm.from_pandas(X=dum_df, max_iter=10, w_threshold=0.95)
+learned_sm = from_pandas(X=dum_df, max_iter=10, w_threshold=0.95, tabu_edges=bl_tup, tabu_child_nodes=["season"])
 
 
 #print("Finished structure learning...begin pickling structure model.")
