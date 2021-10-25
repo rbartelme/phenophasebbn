@@ -11,4 +11,4 @@ RUN apt-get update && apt-get install -y \
         vim
 
 #install causalnex via pip
-RUN pip install causalnex
+RUN pip install causalnex pygraphviz
