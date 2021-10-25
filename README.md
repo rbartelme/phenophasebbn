@@ -79,8 +79,8 @@ How the contents of this repository were used to generate the analysis.
   - Improve graph structure with `NO TEARS` using the `from_pandas` function from `causalnex` blacklisting spurrious node + edge connections with a second list of tuples
   - Exports:
     * categorical label encodings for `genotype` (or cultivar) `/bbn/genotype_map.json` & `/bbn/season_map.json`
-    * pickle of structure model
-    * `png` of directed acyclic graph exported as `/bbn/final_graph.png`
+    * pickle of structure model as `/bbn/nt_sm`
+    * `png` of directed acyclic graph as `/bbn/final_graph.png`
 
 **5. Discritized Data Mapping & Conditional Probability Distribution Fitting:**
   - Import Bayesian Network by structure model pickle
