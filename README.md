@@ -1,3 +1,7 @@
+***As of October 29th 2021, this project is no longer maintained in this repository. For any further updates  to this project, please see the [GenoPhenoEnvo](https://genophenoenvo.github.io/) organization [repository](https://github.com/genophenoenvo/phenophasebbn)***
+
+
+
 # *Sorghum bicolor bicolor* Phenophase Bayesian Belief Network in R & Python
 
 This project uses:
